@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head> <title>{% block title %}Slogan Here{% endblock %} | MyrchMe</title>
+    <meta name="description" content="Add description here."/>
+    <meta name="keywords" content=""/>
+    <link href="/site_media/css/main.css" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" href="/site_media/images/favicon.png" type="image/x-icon" />
+
+    {%block scripts%}
+    {% endblock %}
+</head>
+
+<body>
+ <div id="siteContainer">
+    <div id='header'>
+    {% block top %}
+     <br />
+     <span id='logo'>
+            <a href="/"><img src="/site_media/images/myrchme_logo.png" alt="MyrchMe logo"/></a>
+     </span>
+     {% endblock %}
+     </div>
+
+ {% block content %}
+ {% endblock %}
+
+ {% block footer %}
+  <div id="footer">
+        About | What is MyrchMe? | Contact Us <br/>
+        &#169; 2010 MyrchMe, All Rights Reserved.
+  </div>
+ {% endblock %}
+ </div>
+</body>
+</html>
