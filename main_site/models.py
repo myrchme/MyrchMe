@@ -29,10 +29,10 @@ class Person(models.Model):
     card_sec_code = models.IntegerField(max_length=3, blank=True)
     
     FREQ_CHOICES = (
-        ('WEEK', 'Extra-small'),
-        ('BIWK', 'Small'),
-        ('MNTH', 'Medium'),
-        ('OFF', 'Large')
+        ('WEEK', 'Weekly'),
+        ('BIWK', 'Bi-weekly'),
+        ('MNTH', 'Monthly'),
+        ('OFF', 'Off')
     )
     gift_freq = models.CharField(max_length=4, default='OFF')
 
