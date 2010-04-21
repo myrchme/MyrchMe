@@ -9,6 +9,7 @@ class Person(models.Model):
     """
     user = models.ForeignKey(User, unique=True)
     join_date = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(auto_now=True)
 
     username = models.CharField(max_length=40, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
@@ -25,8 +26,8 @@ class Person(models.Model):
     country = models.CharField(max_length=50)
 
     #Payment info
-    cc_number = models.IntegerField(max_length=16, blank=True)
-    card_sec_code = models.IntegerField(max_length=3, blank=True)
+    cc_number = models.PositiveIntegerField(max_length=16, blank=True)
+    card_sec_code = models.PositiveIntegerField(max_length=3, blank=True)
     
     FREQ_CHOICES = (
         ('WEEK', 'Weekly'),
@@ -50,7 +51,9 @@ class Vendor(models.Model):
     vendor_username = models.CharField(max_length=40, unique=True)
     company_name = models.CharField(max_length=40)
     website_URL = models.URLField(max_length=300, verify_exists=True)
+    
     join_date = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(auto_now=True)
 
     rep_first_name = models.CharField(max_length=40)
     rep_last_name = models.CharField(max_length=40)
@@ -109,12 +112,15 @@ class Product(models.Model):
     #image = models.ImageField(upload_to=None)
     image_url = models.URLField(verify_exists=True, max_length=300)
     brand = models.CharField(max_length=50)
-    isbn = models.IntegerField(max_length=13, blank=True)
+    isbn = models.PositiveIntegerField(max_length=13, blank=True)
     category = models.ForeignKey(Category)
     subcategory = category = models.ForeignKey(Subcategory)
     upc = models.CharField(max_length=12, blank=True)
     color = models.CharField(max_length=20, blank=True)
     size = models.CharField(max_length=3, choices=SIZE_CHOICES ,blank=True)
+
+    create_date = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
 
 class PersPref(models.Model):
@@ -133,12 +139,12 @@ class Transaction(models.Model):
     """
     Transaction:
     Stores data associated with each transaction.
-
     """
     buyer = models.ForeignKey(Person)
     item = models.ForeignKey(Product)
     vendor = models.ForeignKey(Vendor)
-    date = models.DateTimeField(auto_now_add=True)
+    create_date = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
     STATUS_CHOICES = (
         ('PROCESSING', 'Processing'),
         ('SHIPPED', 'Shipped'),
@@ -146,3 +152,16 @@ class Transaction(models.Model):
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     details = models.CharField(max_length=500)
+
+
+class ProductVote(models.Model):
+    """
+    ProductVote:
+    Stores user's votes on products
+    """
+    user = models.ForeignKey(Person)
+    product = models.ForeignKey(Product)
+    date = models.DateTimeField(auto_now_add=True)
+    
+    #an integer from 1 to 5
+    vote = models.PositiveIntegerField(max_length=1)
