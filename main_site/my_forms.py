@@ -3,7 +3,9 @@ my_forms.py
 Handles our forms.
 """
 
+from django.forms import ModelForm
 from django import forms
+from django.db import models
 from myrchme.main_site.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -11,11 +13,12 @@ from django.http import *
 
 
 
-class RegisterForm(forms.ModelForm):
+class RegisterForm(ModelForm):
     """
     RegisterForm:
     Form generated for registering users.
     """
+    password = forms.CharField(label=('password'), widget=forms.PasswordInput)
 
     class Meta:
         model = Person
@@ -53,10 +56,10 @@ class RegisterForm(forms.ModelForm):
         """
 
         password = self.cleaned_data['password']
-        password2 = self.cleaned_data['password2']
+        #password2 = self.cleaned_data['password2']
 
-        if (password != password2):
-            raise forms.ValidationError("Your two passwords don't match.")
+       # if (password != self.password2):
+            #raise forms.ValidationError("Your two passwords don't match.")
         if len(password) < 6:
             raise forms.ValidationError("Your password must be at least" +
                                         "6 characters long.")
@@ -78,7 +81,10 @@ class RegisterForm(forms.ModelForm):
         user.save()
 
         #new lines necessary to create Person object when creating a User
-        person = Person(user=user, email_primary=email, username=username)
+        person = Person(user=user, email_primary=email, username=username,
+                        first_name=self.cleaned_data["first_name"],
+                        last_name=self.cleaned_data["last_name"],
+                        gender=self.cleaned_data["gender"])
         person.save()
 
         #login in the user

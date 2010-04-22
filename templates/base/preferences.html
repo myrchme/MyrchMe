@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+
+{%block scripts%}
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+  <b>Current Preferences:</b><br /><br />
+    {% for pref in preferences %}
+     <div>{{pref.category.title}} {{pref.tagwords}}</div>
+    {% endfor %}
+    
+    <br/><b>Add new preferences:</b>
+
+      <form method="POST" action="">
+        {{ pref_form.management_form }}
+        {% for form in pref_form.forms %}
+          <br />
+          <div>Category:{{form.category}}</div>
+          <div>Tags:{{form.tagwords}}</div>
+          <div>List items in this category that you've bought before: {{form.history}}</div>
+          <div>Size:{{form.size}}</div>
+          <br />
+        {% endfor %}
+        <input type="submit" value="Add">
+        <b>{{message}}
+        {{pref_form.error}}</b>
+      </form>
+
+{% endblock %}

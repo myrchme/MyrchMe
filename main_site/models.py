@@ -20,16 +20,16 @@ class Person(models.Model):
     email_subscription = models.BooleanField(default=True)
 
     #Location Information
-    address1 = models.CharField(max_length=100)
+    address1 = models.CharField(max_length=100, blank=True)
     address2 = models.CharField(max_length=100, blank=True)
-    city = models.CharField(max_length=50)
+    city = models.CharField(max_length=50, blank=True)
     zip = models.CharField(max_length=5, blank=True)
     state = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50)
+    country = models.CharField(max_length=50, blank=True)
 
     #Payment info (needs to be secured later)
-    cc_number = models.PositiveIntegerField(max_length=16, blank=True)
-    card_sec_code = models.PositiveIntegerField(max_length=3, blank=True)
+    cc_number = models.PositiveIntegerField(max_length=16, blank=True, null=True)
+    card_sec_code = models.PositiveIntegerField(max_length=3, blank=True, null=True)
 
     #Global gift preferences
     FREQ_CHOICES = (
@@ -39,7 +39,7 @@ class Person(models.Model):
         ('OFF', 'Off')
     )
     gift_freq = models.CharField(max_length=4, default='OFF')
-    max_gift_price = models.PositiveIntegerField(max_length=9)
+    max_gift_price = models.PositiveIntegerField(max_length=9, blank=True, null=True)
     min_gift_price = models.PositiveIntegerField(max_length=9, blank=True,
                                                  default=0)
 
@@ -83,7 +83,7 @@ class Category(models.Model):
     parent = models.ForeignKey('self', null=True, default=None)
 
     def __unicode__(self):
-        return '%s \n %s \n %s' % (self.title,"-"*20, self.description)
+        return '%s' % (self.title)
 
 SIZE_CHOICES = (
         ('XS', 'Extra-small'),
