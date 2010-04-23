@@ -2,10 +2,10 @@
 my_forms.py
 Handles our forms.
 """
-
+from string import capitalize
 from django.forms import ModelForm
 from django import forms
-from django.db import models
+#from django.db import models
 from myrchme.main_site.models import *
 from django.contrib.auth.models import User
 from django.http import *
@@ -37,8 +37,8 @@ class RegisterPersonForm(RegisterForm):
         #create and save Person
         person = Person(user = user, email_primary = user.email,
                         username = user.username,
-                        first_name = self.cleaned_data["first_name"],
-                        last_name = self.cleaned_data["last_name"],
+                        first_name=capitalize(self.cleaned_data["first_name"]),
+                        last_name = capitalize(self.cleaned_data["last_name"]),
                         gender = self.cleaned_data["gender"])
         person.save()
 
@@ -47,20 +47,20 @@ class RegisterVendorForm(RegisterForm):
     class Meta:
         model = Vendor
         fields= ('company_name','rep_first_name','rep_last_name','username',
-                 'email_primary','website_URL','buy_URL')
+                 'email_primary','website_url','buy_url')
 
-    def save_person(self):
+    def save_vendor(self):
         #create and save User
         user = self.save_user()
 
         #create and save Person
         vendor = Vendor(user = user, email_primary = user.email,
-                        username = user.username,
-                        company_name = self.cleaned_data["company_name"],
-                        rep_first_name = self.cleaned_data["rep_first_name"],
-                        rep_last_name = self.cleaned_data["rep_last_name"],
-                        website_URL = self.cleand_date["website_URL"],
-                        buy_URL = self.cleaned_data["buy_URL"])
+                username = user.username,
+                company_name = capitalize(self.cleaned_data["company_name"]),
+                rep_first_name= capitalize(self.cleaned_data["rep_first_name"]),
+                rep_last_name = capitalize(self.cleaned_data["rep_last_name"]),
+                website_url = self.cleaned_data["website_url"],
+                buy_url = self.cleaned_data["buy_url"])
         vendor.save()
 
 

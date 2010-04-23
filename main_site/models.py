@@ -11,6 +11,7 @@ class Person(models.Model):
     user = models.ForeignKey(User, unique=True)
     join_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
 
     username = models.CharField(max_length=40, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
@@ -57,18 +58,19 @@ class Vendor(models.Model):
     user = models.ForeignKey(User, unique=True)
     username = models.CharField(max_length=40, unique=True)
     company_name = models.CharField(max_length=40)
-    website_URL = models.URLField(max_length=300, verify_exists=True)
-    phone = models.PositiveIntegerField(max_length=14, blank=True)
+    website_url = models.URLField(max_length=300, verify_exists=True)
+    phone = models.PositiveIntegerField(max_length=14, null=True, blank=True)
     
     join_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
 
     rep_first_name = models.CharField(max_length=40)
     rep_last_name = models.CharField(max_length=40)
     email_primary = models.EmailField(unique=True)
 
     # Directs us to the vendor's implementation of the Buy API
-    buy_url = models.URLField(max_length=300)
+    buy_url = models.URLField(max_length=300, verify_exists=False)
 
     api_key = models.CharField(default=generate_key(),max_length=20,unique=True)
 
