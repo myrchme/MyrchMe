@@ -20,7 +20,7 @@ def index(request):
 
 def register_person(request):
     """
-    registerPerson:
+    register_person:
     """
     if request.user.id:
         return redirect('/profile')
@@ -30,7 +30,7 @@ def register_person(request):
         form = RegisterPersonForm(request.POST)
         #if from is valid, add the user and log them in
         if form.is_valid():
-                form.save_person(request)
+                form.save_person()
                 user = authenticate(username=form.cleaned_data["username"],
                                     password=form.cleaned_data["password"])
                 login(request, user)
@@ -45,8 +45,47 @@ def register_person(request):
     return render_to_response('base/register.html', {'form':form})
 
 
-def view_profile(request):
-     return render_to_response('base/profile.html')
+def register_vendor(request):
+    """
+    register_vendor:
+    """
+    if request.user.id:
+        return redirect('/store-profile')
+
+    #handles registration form, registers user
+    if request.method == 'POST':
+        form = RegisterVendorForm(request.POST)
+        #if from is valid, add the user and log them in
+        if form.is_valid():
+                form.save_vendor()
+                user = authenticate(username=form.cleaned_data["username"],
+                                    password=form.cleaned_data["password"])
+                login(request, user)
+                return redirect('/store-profile')
+        else:
+                form.error = "Form error."
+
+    else:
+        #request is a GET (seeing page for 1st time)
+        form = RegisterVendorForm()
+
+    return render_to_response('base/register-vendor.html', {'form':form})
+
+
+@login_required
+def view_person_profile(request):
+    """
+    view_person_profile:
+    """
+    return render_to_response('base/profile.html')
+
+
+@login_required
+def view_store_profile(request):
+    """
+    view_store_profile:
+    """
+    return render_to_response('base/store_profile.html')
 
 
 @login_required
