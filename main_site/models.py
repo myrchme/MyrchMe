@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from myrchme.main_site.helpers import generate_key
 #from django.contrib import admin
 
 class Person(models.Model):
@@ -53,8 +54,8 @@ class Vendor(models.Model):
     Vendor:
     Holds data related to our vendor's accounts.
     """
-    vendor = models.ForeignKey(User, unique=True)
-    vendor_username = models.CharField(max_length=40, unique=True)
+    user = models.ForeignKey(User, unique=True)
+    username = models.CharField(max_length=40, unique=True)
     company_name = models.CharField(max_length=40)
     website_URL = models.URLField(max_length=300, verify_exists=True)
     phone = models.PositiveIntegerField(max_length=14, blank=True)
@@ -64,14 +65,17 @@ class Vendor(models.Model):
 
     rep_first_name = models.CharField(max_length=40)
     rep_last_name = models.CharField(max_length=40)
-    rep_email_primary = models.EmailField(unique=True)
+    email_primary = models.EmailField(unique=True)
 
     # Directs us to the vendor's implementation of the Buy API
     buy_url = models.URLField(max_length=300)
 
+    api_key = models.CharField(default=generate_key(),max_length=20,unique=True)
+
     def __unicode__(self):
         return '%s \n %s \n %s %s \n Join Date:%s' % (self.vendor_username,
             "-"*20, self.rep_first_name, self.rep_last_name, self.join_date)
+
 
 class Category(models.Model):
     """
@@ -79,11 +83,13 @@ class Category(models.Model):
     Represents product categories.
     """
     title = models.CharField(max_length=50)
+    full_title = models.CharField(max_length=500, unique=True)
     description = models.CharField(max_length=500, blank=True)
     parent = models.ForeignKey('self', null=True, default=None)
 
     def __unicode__(self):
-        return '%s' % (self.title)
+        return '%s' % (self.full_title)
+
 
 SIZE_CHOICES = (
         ('XS', 'Extra-small'),
@@ -103,6 +109,7 @@ class Product(models.Model):
     title = models.CharField(max_length=70)
     description = models.TextField()
     prod_id = models.CharField(max_length=30)
+    is_active = models.BooleanField(default=True)
     CONDITION_CHOICES = (
         ('NEW', 'New'),
         ('USED', 'Used'),
@@ -168,6 +175,7 @@ class ProductVote(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     #an integer from 1 to 5
     vote = models.PositiveIntegerField(max_length=1)
+
 
 class ProductComment(models.Model):
     """
