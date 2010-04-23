@@ -101,7 +101,6 @@ def set_preferences(request):
     pref_form = PersPrefFormSet(instance=curr_person)
     
     if request.method == 'POST':
-        #pers_pref = PersPref(user=curr_person)
         pref_form = PersPrefFormSet(request.POST, instance=curr_person)
         if pref_form.is_valid():
             pref_form.save()
