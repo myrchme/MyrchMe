@@ -9,30 +9,20 @@ class Person(models.Model):
     Stores user data. We are extending Django's built in User and Auth models.
     """
     user = models.ForeignKey(User, unique=True)
+    username = models.CharField(max_length=40, unique=True)
     join_date = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
 
-    username = models.CharField(max_length=40, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
     GENDER = (('M', 'Male'),('F', 'Female'))
     gender = models.CharField(max_length=1, choices=GENDER)
     email_primary = models.EmailField(unique=True)
-    email_subscription = models.BooleanField(default=True)
-
-    #Location Information
-    address1 = models.CharField(max_length=100, blank=True)
-    address2 = models.CharField(max_length=100, blank=True)
-    city = models.CharField(max_length=50, blank=True)
-    zip = models.CharField(max_length=5, blank=True)
-    state = models.CharField(max_length=50, blank=True)
-    country = models.CharField(max_length=50, blank=True)
-
-    #Payment info (needs to be secured later)
-    cc_number = models.PositiveIntegerField(max_length=16, blank=True, null=True)
-    card_sec_code = models.PositiveIntegerField(max_length=3, blank=True, null=True)
-
+    is_email_subscription = models.BooleanField(default=True)
+    shipping_address = models.ForeignKey('PhysicalAddress',blank=True,null=True)
+    credit_card = models.ForeignKey('CreditCard', blank=True, null=True)
+   
     #Global gift preferences
     FREQ_CHOICES = (
         ('WEEK', 'Weekly'),
@@ -41,9 +31,10 @@ class Person(models.Model):
         ('OFF', 'Off')
     )
     gift_freq = models.CharField(max_length=4, default='OFF')
-    max_gift_price = models.PositiveIntegerField(max_length=9, blank=True, null=True)
-    min_gift_price = models.PositiveIntegerField(max_length=9, blank=True,
-                                                 default=0)
+    max_gift_price = models.PositiveIntegerField(max_length=9, default=100)
+    min_gift_price = models.PositiveIntegerField(max_length=9, default=0)
+
+    #To be added: privacy options
 
     def __unicode__(self):
             return '%s \n %s \n %s %s \n Join Date:%s' % (self.username, "-" *
@@ -69,9 +60,9 @@ class Vendor(models.Model):
     rep_last_name = models.CharField(max_length=40)
     email_primary = models.EmailField(unique=True)
 
-    # Directs us to the vendor's implementation of the Buy API
+    #Directs us to the vendor's implementation of the Buy API
     buy_url = models.URLField(max_length=300, verify_exists=False)
-
+    #API key used for API authentication
     api_key = models.CharField(default=generate_key(),max_length=20,unique=True)
 
     def __unicode__(self):
@@ -111,6 +102,7 @@ class Product(models.Model):
     title = models.CharField(max_length=70)
     description = models.TextField()
     prod_id = models.CharField(max_length=30)
+    category = models.ForeignKey(Category)
     is_active = models.BooleanField(default=True)
     CONDITION_CHOICES = (
         ('NEW', 'New'),
@@ -122,9 +114,12 @@ class Product(models.Model):
     link = models.URLField(verify_exists=True, max_length=300)
     #image = models.ImageField(upload_to=None)
     image_url = models.URLField(verify_exists=True, max_length=300)
+
+    # Rating: an integer from 1 to 5
+    avg_rating = models.PositiveIntegerField(max_length=1)
+
     brand = models.CharField(max_length=50, blank=True)
     isbn = models.PositiveIntegerField(max_length=13, blank=True)
-    category = models.ForeignKey(Category)
     upc = models.CharField(max_length=12, blank=True)
     color = models.CharField(max_length=20, blank=True)
     size = models.CharField(max_length=3, choices=SIZE_CHOICES ,blank=True)
@@ -155,6 +150,7 @@ class Transaction(models.Model):
     Stores data associated with each transaction.
     """
     buyer = models.ForeignKey(Person)
+    vendor = models.ForeignKey(Vendor)
     item = models.ForeignKey(Product)
     create_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -167,7 +163,7 @@ class Transaction(models.Model):
     details = models.CharField(max_length=500, blank=True)
 
 
-class ProductVote(models.Model):
+class ProductRating(models.Model):
     """
     ProductVote:
     Stores user's votes on products
@@ -176,7 +172,7 @@ class ProductVote(models.Model):
     product = models.ForeignKey(Product)
     date = models.DateTimeField(auto_now_add=True)
     #an integer from 1 to 5
-    vote = models.PositiveIntegerField(max_length=1)
+    rating = models.PositiveIntegerField(max_length=1)
 
 
 class ProductComment(models.Model):
@@ -188,3 +184,36 @@ class ProductComment(models.Model):
     product = models.ForeignKey(Product)
     date = models.DateTimeField(auto_now_add=True)
     comment = models.TextField()
+
+
+class PhysicalAddress(models.Model):
+    """
+    PhysicalAddress:
+    Stores physical addresses, used to make shipping and billing addresses.
+    """
+    street_line1 = models.CharField(max_length=200)
+    street_line2 = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=50)
+    zip = models.CharField(max_length=5, blank=True)
+    state = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=50)
+
+
+class CreditCard(models.Model):
+    """
+    CreditCard:
+    Stores credit card info.
+    """
+    name_on_card = models.CharField(max_length=100)
+    TYPE_CHOICES = (
+        ('VISA', 'Visa'),
+        ('MAST', 'MasterCard'),
+        ('DISC', 'Discover'),
+        ('AMEX', 'American Express')
+
+    )
+    type = models.CharField(max_length=4, choices=TYPE_CHOICES)
+    number = models.PositiveIntegerField(max_length=16)
+    security_code = models.PositiveIntegerField(max_length=3)
+    expiration_date = models.DateField()
+    billing_address = models.ForeignKey('PhysicalAddress')
