@@ -3,15 +3,17 @@ my_forms.py
 Handles our forms.
 """
 from string import capitalize
-from django.forms import ModelForm
 from django import forms
-#from django.db import models
 from myrchme.main_site.models import *
 from django.contrib.auth.models import User
-from django.http import *
 
 
-class RegisterForm(ModelForm):
+class LoginForm(forms.Form):
+    username = forms.CharField(label=('Username:'), max_length=100)
+    password = forms.CharField(label=('Password:'), widget=forms.PasswordInput)
+
+
+class RegisterForm(forms.ModelForm):
     """
     RegisterForm:
     Parent form used for creating Persons and Vendors.

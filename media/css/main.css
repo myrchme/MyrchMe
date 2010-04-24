@@ -26,12 +26,7 @@ a {
     padding:2px 4px 2px 4px;
     text-decoration:none;
 }
-a:hover {
-    background-color:#429bc5;
-    background:rgb(200,200,200);
-    border:none;
-    color:#7AA47A;
-}
+a:hover {}
 h1 {
 	color:#7AA47A;
 	margin:0 0 10px 0;

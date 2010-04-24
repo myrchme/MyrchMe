@@ -14,8 +14,11 @@ def index(request):
     index:
     Main page logic.
     """
-    curr_user = request.user
-    return render_to_response('base/index.html', {'curr_user':curr_user})
+    if request.user.id:
+        return redirect('/profile')
+    login_form = LoginForm()
+    return render_to_response('base/index.html', 
+                             {'login_form':login_form})
 
 
 def register_person(request):
@@ -73,22 +76,61 @@ def register_vendor(request):
 
 
 @login_required
+def change_person_account(request):
+    """
+    change_person_account:
+    """
+    curr_person = Person.objects.get(username=request.user.username)
+    curr_first_name = curr_person.first_name
+    curr_last_name = curr_person.last_name
+    curr_email_primary = curr_person.email_primary
+    curr_email_subcription = curr_person.email_subscription
+    curr_shipping_address = curr_person.shipping_address
+
+    return render_to_response('base/account.html', )
+
+
+@login_required
 def view_person_profile(request):
     """
     view_person_profile:
     """
-    return render_to_response('base/profile.html')
+    curr_person = Person.objects.get(username=request.user.username)
+    preferences = PersPref.objects.filter(user=curr_person)
+    transactions = Transactions.objects.filter(buyer=curr_person)
 
+    return render_to_response('base/profile.html', {'person':curr_person,
+                                                'preferences':preferences,
+                                                'transactions':transactions})
 
 @login_required
 def view_store_profile(request):
     """
     view_store_profile:
     """
-    return render_to_response('base/store_profile.html')
+    curr_vendor = Vendor.objects.get(username=request.user.username)
+    transactions = Transactions.objects.filter(vendor=curr_vendor)
 
+    return render_to_response('base/profile.html', {'vendor':curr_vendor,
+                                                'transactions':transactions})
 
 @login_required
+def view_public_store_profile(request):
+    """
+    view_public_store_profile
+    """
+    curr_vendor = Vendor.objects.get(username=store)
+
+    # displays top ten rated items
+    curr_top_items = Vender.objects.filter(
+        vendor=curr_vendor).filter(isActive=True).order_by('-rating')[:10]
+
+    return render_to_response('base/storefront.html',
+                              {'vendor':curr_vendor,
+                              'top items':curr_top_items})
+
+
+@user_login_required
 def set_preferences(request):
     """
     set_preferences
