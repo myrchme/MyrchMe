@@ -1,9 +1,16 @@
 {% extends "base/base.html" %}
-{%block title %} {% endblock %}
+{%block title %} Home {% endblock %}
 {%block scripts%}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 {% endblock %}
 
 {% block content %}
-    Welcome {{curr_user.username}}!
+
+  <form method="post" action="">
+    {{login_form}}
+    <input type="submit" value="Login">
+  </form>
+  <br />
+  <div><a href="/register">Register now!</a></div>
+
 {% endblock %}

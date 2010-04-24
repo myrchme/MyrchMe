@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from myrchme.main_site.helpers import generate_key
 #from django.contrib import admin
 
+
 class Person(models.Model):
     """
     Person:
