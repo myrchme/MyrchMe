@@ -5,7 +5,7 @@ from django.forms.models import inlineformset_factory
 #HTTP rendering tools
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 #Django Authentication stuff
-from django.contrib.auth.decorators import login_required
+#from django.contrib.auth.decorators import login_required
 #from django.contrib.auth.forms import SetPasswordForm
 
 
@@ -17,29 +17,28 @@ def index(request):
     if request.user.id:
         return redirect('/profile')
     login_form = LoginForm()
-    return render_to_response('base/index.html', 
-                             {'login_form':login_form})
+    return render_to_response('base/index.html',{'login_form':login_form})
 
 
 def register_person(request):
     """
     register_person:
+    Serves registration page for Persons and registers them.
     """
-    if request.user.id:
-        return redirect('/profile')
+    redirect_logged_in_users(request)
 
     #handles registration form, registers user
     if request.method == 'POST':
         form = RegisterPersonForm(request.POST)
         #if from is valid, add the user and log them in
         if form.is_valid():
-                form.save_person()
-                user = authenticate(username=form.cleaned_data["username"],
-                                    password=form.cleaned_data["password"])
-                login(request, user)
-                return redirect('/profile')
+            form.save_person()
+            user = authenticate(username=form.cleaned_data["username"],
+                                password=form.cleaned_data["password"])
+            login(request, user)
+            return redirect('/profile')
         else:
-                form.error = "Form error."
+            form.error = "Form not valid."
 
     else:
         #request is a GET (seeing page for 1st time)
@@ -51,9 +50,9 @@ def register_person(request):
 def register_vendor(request):
     """
     register_vendor:
+    Serves registration page for Vendors and registers them.
     """
-    if request.user.id:
-        return redirect('/store-profile')
+    redirect_logged_in_users(request)
 
     #handles registration form, registers user
     if request.method == 'POST':
@@ -66,77 +65,79 @@ def register_vendor(request):
                 login(request, user)
                 return redirect('/store-profile')
         else:
-                form.error = "Form error."
+                form.error = "Form not valid."
 
     else:
         #request is a GET (seeing page for 1st time)
         form = RegisterVendorForm()
 
-    return render_to_response('base/register-vendor.html', {'form':form})
+    return render_to_response('base/register_vendor.html', {'form':form})
 
 
-@login_required
+@user_login_required(user_type='Person')
 def change_person_account(request):
     """
     change_person_account:
     """
-    curr_person = Person.objects.get(username=request.user.username)
-    curr_first_name = curr_person.first_name
-    curr_last_name = curr_person.last_name
-    curr_email_primary = curr_person.email_primary
-    curr_email_subcription = curr_person.email_subscription
-    curr_shipping_address = curr_person.shipping_address
+    curr_person = get_object_or_404(Person, username=request.user.username)
+    account_dict= { 'first_name':curr_person.first_name,
+                    'last_name':curr_person.last_name,
+                    'email':curr_person.email_primary,
+                    'is_subscribed':curr_person.is_email_subscription,
+                    'shipping_address':curr_person.shipping_address
+    }
+    return render_to_response('base/account.html', account_dict)
 
-    return render_to_response('base/account.html', )
 
-
-@login_required
+@user_login_required
 def view_person_profile(request):
     """
     view_person_profile:
     """
-    curr_person = Person.objects.get(username=request.user.username)
+    curr_person = get_object_or_404(Person, username=request.username)
     preferences = PersPref.objects.filter(user=curr_person)
-    transactions = Transactions.objects.filter(buyer=curr_person)
+    transactions = Transaction.objects.filter(buyer=curr_person)
+    profile_dict= { 'person':curr_person,
+                    'preferences':preferences,
+                    'transactions':transactions
+    }
+    return render_to_response('base/profile.html', profile_dict)
 
-    return render_to_response('base/profile.html', {'person':curr_person,
-                                                'preferences':preferences,
-                                                'transactions':transactions})
 
-@login_required
-def view_store_profile(request):
+@user_login_required(user_type='Vendor')
+def view_my_store_profile(request):
     """
     view_store_profile:
     """
-    curr_vendor = Vendor.objects.get(username=request.user.username)
-    transactions = Transactions.objects.filter(vendor=curr_vendor)
+    curr_vendor = get_object_or_404(Vendor, username=request.user.username)
+    transactions = Transaction.objects.filter(vendor=curr_vendor)
+    profile_dict = {'vendor':curr_vendor, 'transactions':transactions}
 
-    return render_to_response('base/profile.html', {'vendor':curr_vendor,
-                                                'transactions':transactions})
+    return render_to_response('base/store_profile.html', profile_dict)
 
-@login_required
-def view_public_store_profile(request):
+
+def view_public_store_profile():
     """
     view_public_store_profile
     """
-    curr_vendor = Vendor.objects.get(username=store)
+    curr_vendor = get_object_or_404(Vendor, username=store)
 
     # displays top ten rated items
-    curr_top_items = Vender.objects.filter(
-        vendor=curr_vendor).filter(isActive=True).order_by('-rating')[:10]
+    curr_top_items = Product.objects.filter(vendor=curr_vendor
+                     ).filter(is_active=True
+                     ).order_by('-rating')[:10]
+    profile_dict = {'vendor':curr_vendor,'top items':curr_top_items}
 
-    return render_to_response('base/storefront.html',
-                              {'vendor':curr_vendor,
-                              'top items':curr_top_items})
+    return render_to_response('base/storefront.html', profile_dict)
 
 
-@user_login_required
+@user_login_required(user_type='Person')
 def set_preferences(request):
     """
     set_preferences
     """
     curr_user = request.user
-    curr_person = Person.objects.get(username=curr_user.username)
+    curr_person = get_object_or_404(Person, username=curr_user.username)
     preferences = PersPref.objects.filter(user=curr_person)
 
     PersPrefFormSet = inlineformset_factory(Person, PersPref, max_num=1)
