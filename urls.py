@@ -1,24 +1,18 @@
 from django.conf.urls.defaults import *
-
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('',
+    # Urls to serve static media: JS,CSS,images,etc
     (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
         {'document_root': '/Users/Ahmed/myrchme/media/'}),
-    (r'^$', 'myrchme.main_site.views.index'),
-    (r'^register$', 'myrchme.main_site.views.register_person'),
-    (r'^register-vendor$', 'myrchme.main_site.views.register_vendor'),
-    (r'^profile$', 'myrchme.main_site.views.view_person_profile'),
-    (r'^store-profile$', 'myrchme.main_site.views.view_store_profile'),
-    (r'^preferences$', 'myrchme.main_site.views.set_preferences'),
-    (r'^account$', 'myrchme.main_site.views.change_person_account')
 
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
-    # to INSTALLED_APPS to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # Main site urls
+    (r'', include('myrchme.main_site.urls')),
 
-    # Uncomment the next line to enable the admin:
-    # (r'^admin/', include(admin.site.urls)),
+    # Django's auto-generated documentation
+    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    
+    # Django's admin backend
+    (r'^admin/', include(admin.site.urls))
 )

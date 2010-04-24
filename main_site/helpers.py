@@ -9,6 +9,20 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from random import choice
 import string
 
+
+def redirect_logged_in_users(request):
+    """
+    redirect_logged_in_users:
+    Redirects logged in users away from pages they shouldn't see.
+    E.g. Registration pages.
+    """
+    if request.user.username:
+        if Person.objects.filter(username=request.user.username).count()==1:
+            return redirect('/profile')
+        else:
+            return redirect('/store-profile')
+
+
 def user_login_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME,
                         user_type='User'):
     """
