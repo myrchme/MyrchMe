@@ -4,13 +4,25 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 {% endblock %}
 
-{% block content %}
-
+{% block top_right %}
   <form method="post" action="">
-    {{login_form}}
+    Username:{{login_form.username}} &nbsp;&nbsp;Password:{{login_form.password}}
     <input type="submit" value="Login">
+    <div style="color: red;"> {{error}} </div>
   </form>
-  <br />
-  <div><a href="/register">Register now!</a></div>
+{% endblock %}
+
+{% block content %}
+  <div style="float:left; width:70%;">
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+      Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+      Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+  </div>
+  <div style="float:right;"><a href="/register"><h1>Register now!</h1></a></div>
 
 {% endblock %}

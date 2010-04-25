@@ -9,6 +9,8 @@ class Person(models.Model):
     Person:
     Stores user data. We are extending Django's built in User and Auth models.
     """
+    class Meta:
+        permissions = (("is_person", "Standard Person permissions"))
     user = models.ForeignKey(User, unique=True)
     username = models.CharField(max_length=40, unique=True)
     join_date = models.DateTimeField(auto_now_add=True)
@@ -47,6 +49,8 @@ class Vendor(models.Model):
     Vendor:
     Holds data related to our vendor's accounts.
     """
+    class Meta:
+        permissions = (("is_vendor", "Standard Vendor permissions"))
     user = models.ForeignKey(User, unique=True)
     username = models.CharField(max_length=40, unique=True)
     company_name = models.CharField(max_length=40)

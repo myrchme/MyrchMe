@@ -15,10 +15,12 @@
     <div id='header'>
     {% block top %}
      <br />
-     <span id='logo'>
+     <div id='logo' style="float:left">
          <a href="/"><img width="184px" height="74"src="/site_media/images/myrchme_logo.png" alt="MyrchMe logo"/></a>
-     </span>
+     </div>
+     <div style="float:right">{% block top_right %} {% endblock %}</div>
      <br /><br />
+     <div class="clear" style="padding-bottom:20px;"> </div>
      {% endblock %}
      </div>
 
