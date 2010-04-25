@@ -5,8 +5,42 @@
 {% endblock %}
 
 {% block content %}
+ <h3>Vendor Registration</h3>
  <form method="post" action="">
-    {{form}}
+
+    <div style="float:left">
+        <div style="padding:0px 5px 11px 0px;">Company Name: </div>
+        <div style="padding:0px 5px 11px 0px;">First Name: </div>
+        <div style="padding:0px 5px 11px 0px;">Last Name: </div>
+        <div style="padding:0px 5px 11px 0px;">Website URL: </div>
+        <div style="padding:0px 5px 11px 0px;">Buy URL: </div>
+        <div style="padding:0px 5px 11px 0px;">Email: </div>
+        <div style="padding:0px 5px 11px 0px;">Username: </div>
+        <div style="padding:0px 5px 11px 0px;">Password: </div>
+    </div>
+
+     <div style="float:left">
+        <div style="padding-bottom:10px">{{form.company_name}}</div>
+        <div style="padding-bottom:10px">{{form.rep_first_name}}</div>
+        <div style="padding-bottom:10px">{{form.rep_last_name}}</div>
+        <div style="padding-bottom:10px">{{form.website_url}}</div>
+        <div style="padding-bottom:10px">{{form.buy_url}}</div>
+        <div style="padding-bottom:10px">{{form.email_primary}}</div>
+        <div style="padding-bottom:10px">{{form.username}}</div>
+        <div style="padding-bottom:10px">{{form.password}}</div>
+     </div>
+
+     <div style="float:left">
+        <div style="margin-top:-13px; height:25px;"> {{form.company_name.errors}}</div>
+        <div style="height:20px;"> {{form.rep_first_name.errors}}</div>
+        <div style="height:20px;"> {{form.rep_last_name.errors}}</div>
+        <div style="height:20px;"> {{form.website_url.errors}}</div>
+        <div style="height:20px;"> {{form.buy_url.errors}}</div>
+        <div style="height:20px;"> {{form.email_primary.errors}}</div>
+        <div style="height:20px;"> {{form.username.errors}}</div>
+        <div style="height:20px;"> {{form.password.errors}}</div>
+     </div>
+     <div class="clear"></div>
     <input type="submit" value="Register">
  </form>
 {% endblock %}

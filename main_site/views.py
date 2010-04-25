@@ -59,7 +59,8 @@ def register_vendor(request):
     register_vendor:
     Serves registration page for Vendors and registers them.
     """
-    redirect_logged_in_users(request)
+    if request.user.id:
+        return redirect_logged_in_users(request.user)
 
     #handles registration form, registers user
     if request.method == 'POST':
