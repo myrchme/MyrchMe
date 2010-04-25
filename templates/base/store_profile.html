@@ -4,6 +4,18 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 {% endblock %}
 
+{% block top_right %}
+  <div>Logged in as <strong>{{vendor.username}}</strong> | 
+      <a href="/logout">Logout</a>
+  </div>
+{% endblock %}
+
 {% block content %}
-    Store Profile Info
+    <h2>Welcome {{vendor.rep_first_name}}!</h2><br />
+    <h3>Recent transactions: </h3>
+    {% for transaction in transactions %}
+      <div>
+        Date: {{transaction.create_date}} Item: {{transaction.item.title}}
+      </div>
+    {% endfor %}
 {% endblock %}

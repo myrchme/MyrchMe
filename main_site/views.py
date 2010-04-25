@@ -177,7 +177,7 @@ def upload_products(file,vendor):
     import csv
     reader = csv.reader(open(file, 'rU'), dialect='excel-tab')
     for line in reader:
-        new_product, created = Product.objects.get_or_create(
+        product, created = Product.objects.get_or_create(
             vendor = vendor,
             prod_id = line[0],
             category = line[1],
@@ -195,5 +195,5 @@ def upload_products(file,vendor):
         if(created):
             products_added += 1
         else:
-            failed_products.append(new_product)
+            failed_products.append(product)
     return products_added, failed_products
