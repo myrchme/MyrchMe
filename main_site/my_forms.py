@@ -15,7 +15,7 @@ class LoginForm(forms.Form):
     username = forms.CharField(label=('Username:'), max_length=100)
     password = forms.CharField(label=('Password:'), widget=forms.PasswordInput)
 
-    def process(self):
+    def process(self, request):
         error=""
         #if from is fill out, authenticate the user and log them in
         if self.is_valid():
