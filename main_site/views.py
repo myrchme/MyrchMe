@@ -1,9 +1,10 @@
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.forms.models import inlineformset_factory
 from myrchme.main_site.models import *
 from myrchme.main_site.my_forms import *
 from myrchme.main_site.helpers import *
-from django.forms.models import inlineformset_factory
 #HTTP rendering tools
-from django.shortcuts import render_to_response, get_object_or_404, redirect
 #Django Authentication stuff
 #from django.contrib.auth.decorators import login_required
 #from django.contrib.auth.forms import SetPasswordForm
@@ -15,9 +16,15 @@ def index(request):
     Main page logic.
     """
     if request.user.id:
-        return redirect('/profile')
+        return redirect_logged_in_users(request.user)
+    error = ""
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        return form.process()
+            
     login_form = LoginForm()
-    return render_to_response('base/index.html',{'login_form':login_form})
+    index_dict = {'login_form':login_form, 'error':error}
+    return render_to_response('base/index.html', index_dict)
 
 
 def register_person(request):
@@ -25,7 +32,7 @@ def register_person(request):
     register_person:
     Serves registration page for Persons and registers them.
     """
-    redirect_logged_in_users(request)
+    redirect_logged_in_users(request.user)
 
     #handles registration form, registers user
     if request.method == 'POST':
@@ -89,12 +96,12 @@ def change_person_account(request):
     return render_to_response('base/account.html', account_dict)
 
 
-@user_login_required
+@user_login_required(user_type='Person')
 def view_person_profile(request):
     """
     view_person_profile:
     """
-    curr_person = get_object_or_404(Person, username=request.username)
+    curr_person = get_object_or_404(Person, username=request.user.username)
     preferences = PersPref.objects.filter(user=curr_person)
     transactions = Transaction.objects.filter(buyer=curr_person)
     profile_dict= { 'person':curr_person,
@@ -157,6 +164,10 @@ def set_preferences(request):
     return render_to_response('base/preferences.html',
                              {'preferences':preferences,
                               'pref_form':pref_form, 'errors':pref_form.errors})
+
+def logout_view(request):
+    logout(request)
+    return redirect('/')
 
 
 def upload_products(file,vendor):

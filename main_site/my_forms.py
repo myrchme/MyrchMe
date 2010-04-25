@@ -2,15 +2,34 @@
 my_forms.py
 Handles our forms.
 """
+from django.shortcuts import render_to_response
+from django.contrib.auth import login, authenticate
 from string import capitalize
 from django import forms
 from myrchme.main_site.models import *
+from myrchme.main_site.helpers import *
 from django.contrib.auth.models import User
 
 
 class LoginForm(forms.Form):
     username = forms.CharField(label=('Username:'), max_length=100)
     password = forms.CharField(label=('Password:'), widget=forms.PasswordInput)
+
+    def process(self):
+        error=""
+        #if from is fill out, authenticate the user and log them in
+        if self.is_valid():
+            user = authenticate(username=self.cleaned_data["username"],
+                                password=self.cleaned_data["password"])
+            if user is not None:
+                login(request, user)
+                return redirect_logged_in_users(user)
+            else:
+                error = "Incorrect username and password."
+        else:
+            error = "Please enter your username and password."
+        index_dict = {'login_form':self, 'error':error}
+        return render_to_response('base/index.html', index_dict)
 
 
 class RegisterForm(forms.ModelForm):

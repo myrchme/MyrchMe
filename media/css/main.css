@@ -16,11 +16,11 @@ body,html {
     height:100%;
     margin:0;
     padding:0;
-    min-width:800px;
+    min-width:900px;
     width:90%;
 }
 a {
-    border-bottom:1px dotted #429bc5;
+    border-bottom:1px #429bc5;
     color:#429bc5;
     font-weight:bold !important;
     padding:2px 4px 2px 4px;
@@ -28,7 +28,6 @@ a {
 }
 a:hover {}
 h1 {
-	color:#7AA47A;
 	margin:0 0 10px 0;
 	text-align:left;
 }
@@ -51,6 +50,7 @@ p {margin:5px 0 15px 5px;}
 .clear {clear:both;}
 
 #siteContainer {
+    margin: 5px 25px 15px 25px;
 }
 
 #header {

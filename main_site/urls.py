@@ -7,5 +7,7 @@ urlpatterns = patterns('',
     (r'^profile$', 'myrchme.main_site.views.view_person_profile'),
     (r'^store-profile$', 'myrchme.main_site.views.view_my_store_profile'),
     (r'^preferences$', 'myrchme.main_site.views.set_preferences'),
+    (r'^logout$', 'myrchme.main_site.views.logout_view'),
     (r'^account$', 'myrchme.main_site.views.change_person_account')
+
 )
