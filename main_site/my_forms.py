@@ -12,6 +12,9 @@ from django.contrib.auth.models import User
 
 
 class LoginForm(forms.Form):
+    """
+    LoginForm:
+    """
     username = forms.CharField(label=('Username:'), max_length=100)
     password = forms.CharField(label=('Password:'), widget=forms.PasswordInput)
 
@@ -48,6 +51,9 @@ class RegisterForm(forms.ModelForm):
 
 
 class RegisterPersonForm(RegisterForm):
+    """
+    RegisterPersonForm:
+    """
     class Meta:
         model = Person
         fields=('first_name','last_name','gender','username','email_primary')
@@ -65,6 +71,9 @@ class RegisterPersonForm(RegisterForm):
 
 
 class RegisterVendorForm(RegisterForm):
+    """
+    RegisterVendorForm:
+    """
     class Meta:
         model = Vendor
         fields= ('company_name','rep_first_name','rep_last_name','username',

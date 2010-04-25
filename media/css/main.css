@@ -34,7 +34,6 @@ h1 {
 h2 {
 	color:#aaaaaa;
 	font-size:1.5em;
-	font-style:italic;
 	margin:0 0 10px 0;
 }
 h3 {
@@ -49,11 +48,23 @@ p {margin:5px 0 15px 5px;}
 
 .clear {clear:both;}
 
+.errorlist {
+    color: red;
+    font-size: 12px;
+}
+
+.main_body {
+    margin:20px 10px 0px 10px;
+    padding-bottom: 10px;
+
+}
+
 #siteContainer {
     margin: 5px 25px 15px 25px;
 }
 
 #header {
+    border-bottom:3px solid #dedede;
 }
 
 
@@ -64,6 +75,7 @@ p {margin:5px 0 15px 5px;}
 #footer {
 position: relative;
 text-align: center;
+border-top:1px solid #dedede;
 clear:both;
 }
 
