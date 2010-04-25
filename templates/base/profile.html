@@ -4,7 +4,9 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 {% endblock %}
 {% block top_right %}
-<div>Logged in as <strong>{{person.username}}</strong></div>
+  <div>Logged in as <strong>{{person.username}}</strong> | 
+      <a href="/logout">Logout</a>
+  </div>
 {% endblock %}
 
 {% block content %}
