@@ -20,7 +20,7 @@ def index(request):
     error = ""
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        return form.process()
+        return form.process(request)
             
     login_form = LoginForm()
     index_dict = {'login_form':login_form, 'error':error}
