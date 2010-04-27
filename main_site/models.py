@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.localflavor.us.models import USStateField
 from django.contrib.auth.models import User
 from myrchme.main_site.helpers import generate_key
 #from django.contrib import admin
@@ -106,7 +107,7 @@ class Product(models.Model):
     vendor = models.ForeignKey(Vendor)
     title = models.CharField(max_length=70)
     description = models.TextField()
-    prod_id = models.CharField(max_length=30)
+    prod_id = models.CharField(max_length=30) #vendor's prod_id, not ours
     category = models.ForeignKey(Category)
     is_active = models.BooleanField(default=True)
     CONDITION_CHOICES = (
@@ -200,7 +201,7 @@ class PhysicalAddress(models.Model):
     street_line2 = models.CharField(max_length=200, blank=True)
     city = models.CharField(max_length=50)
     zip = models.CharField(max_length=5, blank=True)
-    state = models.CharField(max_length=50, blank=True)
+    state = USStateField(blank=True)
     country = models.CharField(max_length=50)
 
 

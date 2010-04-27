@@ -32,6 +32,7 @@ class LoginForm(forms.Form):
         else:
             error = "Please enter your username and password."
         index_dict = {'login_form':self, 'error':error}
+        
         return render_to_response('base/index.html', index_dict)
 
 
@@ -47,6 +48,7 @@ class RegisterForm(forms.ModelForm):
         password = self.cleaned_data['password']
         email = self.cleaned_data['email_primary']
         user = User.objects.create_user(username,email,password)
+        
         return user
 
 
@@ -83,7 +85,7 @@ class RegisterVendorForm(RegisterForm):
         #create and save User
         user = self.save_user()
 
-        #create and save Person
+        #create and save Vendor
         vendor = Vendor(user = user, email_primary = user.email,
                 username = user.username,
                 company_name = capitalize(self.cleaned_data["company_name"]),

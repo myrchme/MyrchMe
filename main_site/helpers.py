@@ -3,7 +3,7 @@ helpers.py
 A collection of general helper functions.
 """
 from django.shortcuts import redirect
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from random import choice
@@ -30,14 +30,14 @@ def redirect_logged_in_users(user):
     elif Vendor.objects.filter(username=user.username).count()==1:
         return redirect('/store-profile')
     else:
-        return redirect('/youcannevergethere')
+        return redirect('/logout') #logs out admin users
 
 
 def user_login_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME,
                         user_type='User'):
     """
-    Decorator for views that checks that a Person is logged in, redirecting
-    to the log-in page if necessary.
+    Decorator for views that checks that if a certain type of User is logged in,
+    redirecting to the log-in page if not.
     """
     if user_type=='Person':
         actual_decorator = user_passes_test(

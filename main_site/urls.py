@@ -1,13 +1,17 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('',
-    (r'^$', 'myrchme.main_site.views.index'),
-    (r'^register$', 'myrchme.main_site.views.register_person'),
-    (r'^register-vendor$', 'myrchme.main_site.views.register_vendor'),
-    (r'^profile$', 'myrchme.main_site.views.view_person_profile'),
-    (r'^store-profile$', 'myrchme.main_site.views.view_my_store_profile'),
-    (r'^preferences$', 'myrchme.main_site.views.set_preferences'),
-    (r'^logout$', 'myrchme.main_site.views.logout_view'),
-    (r'^account$', 'myrchme.main_site.views.change_person_account')
+urlpatterns = patterns('myrchme.main_site.views', #views prefix shortcut
+    (r'^$', 'index'),
+    (r'^register$', 'register_person'),
+    (r'^register-vendor$', 'register_vendor'),
+
+    (r'^user/(?P<username>.*)$', 'view_person_profile'),
+    (r'^store/(?P<username>.*)$', 'view_store'),
+
+    (r'^store-profile$', 'view_my_store_profile'),
+    (r'^buy/(?P<id>.*)$', 'buy_view'),
+    (r'^preferences$', 'set_preferences'),
+    (r'^logout$', 'logout_view'),
+    (r'^account$', 'change_person_account')
 
 )
