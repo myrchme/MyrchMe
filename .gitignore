@@ -1,3 +1,4 @@
-.pyc
+*.pyc
 urls.py
 nbproject/*
+*.DS_Store
