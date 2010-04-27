@@ -18,7 +18,17 @@
      <div id='logo' style="float:left">
          <a href="/"><img width="184px" height="74"src="/site_media/images/myrchme_logo.png" alt="MyrchMe logo"/></a>
      </div>
-     <div style="float:right">{% block top_right %} {% endblock %}</div>
+     <div style="float:right">
+         {% block top_right %}
+            {% if user.id %}
+              <div>Logged in as <strong>{{user.username}}</strong> |
+              <a href="/logout">Logout</a>
+              </div>
+            {% else %}
+              <h2><a href="/">Login</a></h2>
+            {% endif %}
+         {% endblock %}
+     </div>
      <br /><br />
      <div class="clear" style="padding-bottom:10px;"> </div>
      {% endblock %}

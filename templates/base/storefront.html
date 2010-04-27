@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+
+{%block scripts%}
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h2>{{vendor.company_name}}</h2><br />
+    <h3>Popular {{vendor.company_name}} products: </h3>
+    {% for product in top_items %}
+      <div><strong>{{product.title}}</strong></div>
+      <div> Rating: {{product.avg_rating}}</div>
+      <div>${{product.price}}</div>
+    {% endfor %}
+{% endblock %}

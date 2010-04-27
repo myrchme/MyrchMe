@@ -1,9 +1,11 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth import logout
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.forms.models import inlineformset_factory
 from myrchme.main_site.models import *
 from myrchme.main_site.my_forms import *
 from myrchme.main_site.helpers import *
+from cgi import escape
 #HTTP rendering tools
 #Django Authentication stuff
 #from django.contrib.auth.decorators import login_required
@@ -87,27 +89,29 @@ def change_person_account(request):
     """
     change_person_account:
     """
-    curr_person = get_object_or_404(Person, username=request.user.username)
+    curr_person = get_object_or_404(Person, user=request.user)
     account_dict= { 'first_name':curr_person.first_name,
                     'last_name':curr_person.last_name,
                     'email':curr_person.email_primary,
                     'is_subscribed':curr_person.is_email_subscription,
-                    'shipping_address':curr_person.shipping_address
+                    'shipping_address':curr_person.shipping_address,
+                    'user':request.user
     }
     return render_to_response('base/account.html', account_dict)
 
 
-@user_login_required(user_type='Person')
-def view_person_profile(request):
+def view_person_profile(request, username): #request MUST be an arg here or
+                                            #function fails
     """
     view_person_profile:
     """
-    curr_person = get_object_or_404(Person, username=request.user.username)
+    curr_person = get_object_or_404(Person, username=escape(username))
     preferences = PersPref.objects.filter(user=curr_person)
     transactions = Transaction.objects.filter(buyer=curr_person)
     profile_dict= { 'person':curr_person,
                     'preferences':preferences,
-                    'transactions':transactions
+                    'transactions':transactions,
+                    'user':request.user
     }
     return render_to_response('base/profile.html', profile_dict)
 
@@ -117,24 +121,30 @@ def view_my_store_profile(request):
     """
     view_store_profile:
     """
-    curr_vendor = get_object_or_404(Vendor, username=request.user.username)
+    curr_vendor = get_object_or_404(Vendor, user=request.user)
     transactions = Transaction.objects.filter(vendor=curr_vendor)
-    profile_dict = {'vendor':curr_vendor, 'transactions':transactions}
-
+    profile_dict = {'vendor':curr_vendor,
+                    'transactions':transactions,
+                    'user': request.user
+    }
+    
     return render_to_response('base/store_profile.html', profile_dict)
 
 
-def view_public_store_profile():
+def view_store(request, username):
     """
-    view_public_store_profile
+    view_store
     """
-    curr_vendor = get_object_or_404(Vendor, username=store)
+    curr_vendor = get_object_or_404(Vendor, username=escape(username))
 
     # displays top ten rated items
     curr_top_items = Product.objects.filter(vendor=curr_vendor
                      ).filter(is_active=True
-                     ).order_by('-rating')[:10]
-    profile_dict = {'vendor':curr_vendor,'top items':curr_top_items}
+                     ).order_by('-avg_rating')[:10]
+    profile_dict = {'vendor':curr_vendor,
+                    'top_items':curr_top_items,
+                    'user': request.user
+    }
 
     return render_to_response('base/storefront.html', profile_dict)
 
@@ -144,8 +154,7 @@ def set_preferences(request):
     """
     set_preferences
     """
-    curr_user = request.user
-    curr_person = get_object_or_404(Person, username=curr_user.username)
+    curr_person = get_object_or_404(Person, user=request.user)
     preferences = PersPref.objects.filter(user=curr_person)
 
     PersPrefFormSet = inlineformset_factory(Person, PersPref, max_num=1)
@@ -166,8 +175,14 @@ def set_preferences(request):
                              {'preferences':preferences,
                               'pref_form':pref_form, 'errors':pref_form.errors})
 
+
 def logout_view(request):
     logout(request)
+    return redirect('/')
+
+
+@user_login_required(user_type='Person')
+def buy_view(request, id):
     return redirect('/')
 
 
