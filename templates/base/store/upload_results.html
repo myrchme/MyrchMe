@@ -1,0 +1,13 @@
+{% extends "base/base.html" %}
+
+{%block title %} Upload Results {% endblock %}
+
+{% block content %}
+    <h3>Upload Results </h3>
+    Number of products successfully added/modified: {{num_added}}
+    {% for line in lines %}
+      <div>
+        Date: {{transaction.create_date}} Item: {{transaction.item.title}}
+      </div>
+    {% endfor %}
+{% endblock %}

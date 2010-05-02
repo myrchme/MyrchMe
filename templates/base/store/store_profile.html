@@ -1,8 +1,6 @@
 {% extends "base/base.html" %}
 
-{%block scripts%}
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-{% endblock %}
+{%block title %} {{vendor.company_name}}'s Profile {% endblock %}
 
 {% block content %}
     <h2>Welcome {{vendor.rep_first_name}}!</h2><br />

@@ -2,20 +2,24 @@
 helpers.py
 A collection of general helper functions.
 """
+#setup Django environment first
+from django.core.management import setup_environ
+from myrchme import settings
+setup_environ(settings)
+
 from django.shortcuts import redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from models import *
 from random import choice
 import string
 
 
 def is_person(user):
-    from myrchme.main_site.models import Person #only works when placed here???
     return Person.objects.filter(username=user.username).count()==1
 
 def is_vendor(user):
-    from myrchme.main_site.models import Vendor
     return Vendor.objects.filter(username=user.username).count()==1
 
 def redirect_logged_in_users(user):
@@ -26,7 +30,7 @@ def redirect_logged_in_users(user):
     """
     from myrchme.main_site.models import Person, Vendor
     if Person.objects.filter(username=user.username).count()==1:
-        return redirect('/profile')
+        return redirect('/user/'+user.username)
     elif Vendor.objects.filter(username=user.username).count()==1:
         return redirect('/store-profile')
     else:

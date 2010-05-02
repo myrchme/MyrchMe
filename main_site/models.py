@@ -122,13 +122,13 @@ class Product(models.Model):
     image_url = models.URLField(verify_exists=True, max_length=300)
 
     # Rating: an integer from 1 to 5
-    avg_rating = models.PositiveIntegerField(max_length=1)
+    avg_rating = models.PositiveIntegerField(max_length=1, default=3)
 
-    brand = models.CharField(max_length=50, blank=True)
-    isbn = models.PositiveIntegerField(max_length=13, blank=True)
-    upc = models.CharField(max_length=12, blank=True)
-    color = models.CharField(max_length=20, blank=True)
-    size = models.CharField(max_length=3, choices=SIZE_CHOICES ,blank=True)
+    brand = models.CharField(max_length=50, blank=True, null=True)
+    isbn = models.PositiveIntegerField(max_length=13, blank=True, null=True)
+    upc = models.CharField(max_length=12, blank=True, null=True)
+    color = models.CharField(max_length=20, blank=True, null=True)
+    size = models.CharField(max_length=3, choices=SIZE_CHOICES ,blank=True, null=True)
 
     create_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)

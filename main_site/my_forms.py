@@ -96,3 +96,28 @@ class RegisterVendorForm(RegisterForm):
         vendor.save()
 
 
+class AccountForm(forms.ModelForm):
+    """
+    AccountForm:
+    """
+    class Meta:
+        model = Person
+        exclude = ('user','username','join_date','last_login','is_active',
+                   'is_email_subscription'
+        )
+
+    def update_account(self, user):
+        # save updated Person
+        person = get_object_or_404(Person, user=user)
+        person.first_name = capitalize(self.cleaned_data["first_name"])
+        person.last_name = capitalize(self.cleaned_data["last_name"])
+        person.gender = self.cleaned_data["gender"]
+        person.email_primary = self.cleaned_data["email_primary"]
+        person.gift_freq = self.cleaned_data["gift_freq"]
+        person.max_gift_price = self.cleaned_data["max_gift_price"]
+        person.min_gift_price = self.cleaned_data["min_gift_price"]
+        person.save()
+
+
+class UploadFileForm(forms.Form):
+    file  = forms.FileField()

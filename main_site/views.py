@@ -45,7 +45,7 @@ def register_person(request):
             user = authenticate(username=form.cleaned_data["username"],
                                 password=form.cleaned_data["password"])
             login(request, user)
-            return redirect('/profile')
+            return redirect('/user/'+user.username)
         else:
             form.error = "Form not valid."
 
@@ -90,14 +90,11 @@ def change_person_account(request):
     change_person_account:
     """
     curr_person = get_object_or_404(Person, user=request.user)
-    account_dict= { 'first_name':curr_person.first_name,
-                    'last_name':curr_person.last_name,
-                    'email':curr_person.email_primary,
-                    'is_subscribed':curr_person.is_email_subscription,
-                    'shipping_address':curr_person.shipping_address,
-                    'user':request.user
-    }
-    return render_to_response('base/account.html', account_dict)
+    
+    #initialize form fields with curr_person data
+    form = AccountForm(instance=curr_person)
+    account_dict= {'form':form,'user':request.user}
+    return render_to_response('base/user/account.html', account_dict)
 
 
 def view_person_profile(request, username): #request MUST be an arg here or
@@ -113,7 +110,7 @@ def view_person_profile(request, username): #request MUST be an arg here or
                     'transactions':transactions,
                     'user':request.user
     }
-    return render_to_response('base/profile.html', profile_dict)
+    return render_to_response('base/user/profile.html', profile_dict)
 
 
 @user_login_required(user_type='Vendor')
@@ -128,7 +125,7 @@ def view_my_store_profile(request):
                     'user': request.user
     }
     
-    return render_to_response('base/store_profile.html', profile_dict)
+    return render_to_response('base/store/store_profile.html', profile_dict)
 
 
 def view_store(request, username):
@@ -146,7 +143,7 @@ def view_store(request, username):
                     'user': request.user
     }
 
-    return render_to_response('base/storefront.html', profile_dict)
+    return render_to_response('base/store/storefront.html', profile_dict)
 
 
 @user_login_required(user_type='Person')
@@ -170,10 +167,13 @@ def set_preferences(request):
                  'message':message})
         else:
             pref_form.error = pref_form.errors
-            
-    return render_to_response('base/preferences.html',
-                             {'preferences':preferences,
-                              'pref_form':pref_form, 'errors':pref_form.errors})
+
+    pref_dict = {'preferences':preferences,
+                 'pref_form':pref_form,
+                 'errors':pref_form.errors,
+                 'user':request.user
+    }        
+    return render_to_response('base/user/preferences.html', pref_dict)
 
 
 def logout_view(request):
@@ -183,32 +183,86 @@ def logout_view(request):
 
 @user_login_required(user_type='Person')
 def buy_view(request, id):
+    #TODO: make a remote buy request
     return redirect('/')
 
 
+@user_login_required(user_type='Vendor')
+def view_inventory(request):
+    curr_vendor = get_object_or_404(Vendor, user=request.user)
+    products = Product.objects.filter(vendor=curr_vendor)
+    invt_dict = {'products':products, 'user':request.user}
+
+    return render_to_response('base/inventory.html', invt_dict)
+
+
+def view_product(request, id):
+    product = get_object_or_404(Product, id=id)
+    prod_dict = {'product':product, 'user':request.user}
+    
+    return render_to_response('base/product_details.html', prod_dict)
+
+
+@user_login_required(user_type='Vendor')
+def upload_products_view(request):
+    curr_vendor = get_object_or_404(Vendor, user=request.user)
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+           num_added, failed_lines = upload_products(request.FILES['file'],
+                                                     curr_vendor)
+           results_dict = {'num_added':num_added,
+                           'failed_lines':failed_lines,
+                           'user':request.user}
+           render_to_response('base/store/upload_results.html', results_dict)
+    else:
+        form = UploadFileForm()
+    form_dict = {'form': form,'user':request.user}
+    
+    return render_to_response('base/store/upload.html', form_dict)
+
+
 def upload_products(file,vendor):
-    products_added = 0;
-    failed_products = []
     import csv
     reader = csv.reader(open(file, 'rU'), dialect='excel-tab')
+    products_added = 0
+    failed_lines = []
+    row_num = 0
     for line in reader:
-        product, created = Product.objects.get_or_create(
-            vendor = vendor,
-            prod_id = line[0],
-            category = line[1],
-            title = line[2],
-            condition = line[3],
-            description = line[4],
-            price = line[5],
-            link = line[6],
-            image_url = line[7],
-            isbn = line[8],
-            upc = line[9],
-            brand = line[10],
-            color = line[11],
-            size = line[12])
-        if(created):
-            products_added += 1
+        if row_num==0:
+            header = row
         else:
-            failed_products.append(product)
-    return products_added, failed_products
+            def add_optional_field(field):
+                return line[header.index(field)] if field in header else None
+
+            #delete any existing product with current prod_id, keeps prod_id
+            #unique for each vendor (remember, these are their IDs, not ours)
+            Product.objects.filter(vendor=vendor, 
+                                   prod_id=line[header.index("prod_id")]
+                                  ).delete()
+
+            product, created = Product.objects.get_or_create(
+                #required fields
+                vendor = vendor,
+                title = line[header.index("title")],
+                description = line[header.index("description")],
+                prod_id = line[header.index("prod_id")],
+                category = line[header.index("category")],
+                is_active = True,
+                condition = line[header.index("condition")],
+                price = line[header.index("price")],
+                link = line[header.index("link")],
+                image_url = line[header.index("image_url")],
+                #optional fields
+                isbn = add_optional_field("isbn"),
+                upc = add_optional_field("upc"),
+                brand = add_optional_field("brand"),
+                color = add_optional_field("color"),
+                size = add_optional_field("size")
+            )
+            if(created):
+                products_added += 1
+            else:
+                failed_lines.append(line)
+
+    return products_added, failed_lines

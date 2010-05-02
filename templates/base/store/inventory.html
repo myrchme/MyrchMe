@@ -1,0 +1,13 @@
+{% extends "base/base.html" %}
+
+{%block title %} Inventory {% endblock %}
+
+{% block content %}
+    <h3>{{vendor.company_name}}'s Inventory: </h3>
+    {% for product in products %}
+      <div>
+        ID: {{product.prod_id}} Name: {{product.title}} Price: ${{product.price}}
+      </div><br />
+    {% endfor %}
+    <a href="/vendor/delete-all">Delete all products</a>
+{% endblock %}
