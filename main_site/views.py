@@ -240,15 +240,23 @@ def upload_products(file,vendor):
             Product.objects.filter(vendor=vendor, 
                                    prod_id=line[header.index("prod_id")]
                                   ).delete()
+            #try getting the Category object associated with this line, skip to
+            #the next iteration/line if we can't find the category
+            try:
+                category = Category.objects.get(full_title=
+                                                line[header.index("category")])
+            except ObjectDoesNotExist:
+                failed_lines.append(line)
+                continue
 
             product, created = Product.objects.get_or_create(
                 #required fields
                 vendor = vendor,
+                category = category,
+                is_active = True,
                 title = line[header.index("title")],
                 description = line[header.index("description")],
                 prod_id = line[header.index("prod_id")],
-                category = line[header.index("category")],
-                is_active = True,
                 condition = line[header.index("condition")],
                 price = line[header.index("price")],
                 link = line[header.index("link")],
@@ -264,5 +272,6 @@ def upload_products(file,vendor):
                 products_added += 1
             else:
                 failed_lines.append(line)
+        row_num += 1
 
     return products_added, failed_lines

@@ -5,13 +5,13 @@ from myrchme.main_site.helpers import generate_key
 #from django.contrib import admin
 
 
+GENDER = (('M', 'Male'),('F', 'Female'))
+
 class Person(models.Model):
     """
     Person:
     Stores user data. We are extending Django's built in User and Auth models.
     """
-    class Meta:
-        permissions = (("is_person", "Standard Person permissions"))
     user = models.ForeignKey(User, unique=True)
     username = models.CharField(max_length=40, unique=True)
     join_date = models.DateTimeField(auto_now_add=True)
@@ -20,7 +20,6 @@ class Person(models.Model):
 
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
-    GENDER = (('M', 'Male'),('F', 'Female'))
     gender = models.CharField(max_length=1, choices=GENDER)
     email_primary = models.EmailField(unique=True)
     is_email_subscription = models.BooleanField(default=True)
@@ -50,8 +49,6 @@ class Vendor(models.Model):
     Vendor:
     Holds data related to our vendor's accounts.
     """
-    class Meta:
-        permissions = (("is_vendor", "Standard Vendor permissions"))
     user = models.ForeignKey(User, unique=True)
     username = models.CharField(max_length=40, unique=True)
     company_name = models.CharField(max_length=40)
@@ -81,7 +78,7 @@ class Category(models.Model):
     Category:
     Represents product categories.
     """
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=100)
     full_title = models.CharField(max_length=500, unique=True)
     description = models.CharField(max_length=500, blank=True)
     parent = models.ForeignKey('self', null=True, default=None)
@@ -118,17 +115,20 @@ class Product(models.Model):
     condition = models.CharField(max_length=6, choices=CONDITION_CHOICES)
     price = models.DecimalField(max_digits=9, decimal_places=2)
     link = models.URLField(verify_exists=True, max_length=300)
-    #image = models.ImageField(upload_to=None)
     image_url = models.URLField(verify_exists=True, max_length=300)
 
     # Rating: an integer from 1 to 5
     avg_rating = models.PositiveIntegerField(max_length=1, default=3)
 
+    #optional fields
     brand = models.CharField(max_length=50, blank=True, null=True)
     isbn = models.PositiveIntegerField(max_length=13, blank=True, null=True)
     upc = models.CharField(max_length=12, blank=True, null=True)
     color = models.CharField(max_length=20, blank=True, null=True)
-    size = models.CharField(max_length=3, choices=SIZE_CHOICES ,blank=True, null=True)
+    size = models.CharField(max_length=3, choices=SIZE_CHOICES , blank=True,
+                            null=True)
+    gender = models.CharField(max_length=1, choices=GENDER, blank=True,
+                              null=True)
 
     create_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
