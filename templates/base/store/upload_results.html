@@ -5,9 +5,9 @@
 {% block content %}
     <h3>Upload Results </h3>
     Number of products successfully added/modified: {{num_added}}
-    {% for line in lines %}
+    {% for line in failed_lines %}
       <div>
-        Date: {{transaction.create_date}} Item: {{transaction.item.title}}
+        Error: {{line}}
       </div>
     {% endfor %}
 {% endblock %}

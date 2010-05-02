@@ -5,6 +5,7 @@ from django.forms.models import inlineformset_factory
 from myrchme.main_site.models import *
 from myrchme.main_site.my_forms import *
 from myrchme.main_site.helpers import *
+from myrchme.settings import UPLOAD_DIR
 from cgi import escape
 #HTTP rendering tools
 #Django Authentication stuff
@@ -193,7 +194,7 @@ def view_inventory(request):
     products = Product.objects.filter(vendor=curr_vendor)
     invt_dict = {'products':products, 'user':request.user}
 
-    return render_to_response('base/inventory.html', invt_dict)
+    return render_to_response('base/store/inventory.html', invt_dict)
 
 
 def view_product(request, id):
@@ -209,28 +210,37 @@ def upload_products_view(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-           num_added, failed_lines = upload_products(request.FILES['file'],
-                                                     curr_vendor)
+           folderpath = UPLOAD_DIR + "vendor/"
+           filepath = save_file(request.FILES['file'], folderpath,
+                                request.user.username)
+           num_added, failed_lines = upload_products(filepath, curr_vendor)
            results_dict = {'num_added':num_added,
                            'failed_lines':failed_lines,
                            'user':request.user}
-           render_to_response('base/store/upload_results.html', results_dict)
+           return render_to_response('base/store/upload_results.html', results_dict)
     else:
         form = UploadFileForm()
-    form_dict = {'form': form,'user':request.user}
-    
-    return render_to_response('base/store/upload.html', form_dict)
+        form_dict = {'form': form,'user':request.user}
+        return render_to_response('base/store/upload.html', form_dict)
 
 
-def upload_products(file,vendor):
+def save_file(f, folderpath=UPLOAD_DIR, append=""):
+    filepath = folderpath + append + "_" + f.name
+    destination = open(filepath, 'wb+')
+    for chunk in f.chunks():
+        destination.write(chunk)
+    destination.close()
+    return filepath
+
+def upload_products(filepath,vendor):
     import csv
-    reader = csv.reader(open(file, 'rU'), dialect='excel-tab')
+    reader = csv.reader(open(filepath, 'rU'), dialect='excel-tab')
     products_added = 0
     failed_lines = []
     row_num = 0
     for line in reader:
         if row_num==0:
-            header = row
+            header = line
         else:
             def add_optional_field(field):
                 return line[header.index(field)] if field in header else None
@@ -246,28 +256,33 @@ def upload_products(file,vendor):
                 category = Category.objects.get(full_title=
                                                 line[header.index("category")])
             except ObjectDoesNotExist:
+                #raise ObjectDoesNotExist
                 failed_lines.append(line)
                 continue
+            try:
+                product, created = Product.objects.get_or_create(
+                    #required fields
+                    vendor = vendor,
+                    category = category,
+                    is_active = True,
+                    title = line[header.index("title")],
+                    description = line[header.index("description")],
+                    prod_id = line[header.index("prod_id")],
+                    condition = line[header.index("condition")],
+                    price = line[header.index("price")],
+                    link = line[header.index("link")],
+                    image_url = line[header.index("image_url")],
+                    #optional fields
+                    isbn = add_optional_field("isbn"),
+                    upc = add_optional_field("upc"),
+                    brand = add_optional_field("brand"),
+                    color = add_optional_field("color"),
+                    size = add_optional_field("size"),
+                    gender = add_optional_field("gender")
+                )
+            except:
+                raise
 
-            product, created = Product.objects.get_or_create(
-                #required fields
-                vendor = vendor,
-                category = category,
-                is_active = True,
-                title = line[header.index("title")],
-                description = line[header.index("description")],
-                prod_id = line[header.index("prod_id")],
-                condition = line[header.index("condition")],
-                price = line[header.index("price")],
-                link = line[header.index("link")],
-                image_url = line[header.index("image_url")],
-                #optional fields
-                isbn = add_optional_field("isbn"),
-                upc = add_optional_field("upc"),
-                brand = add_optional_field("brand"),
-                color = add_optional_field("color"),
-                size = add_optional_field("size")
-            )
             if(created):
                 products_added += 1
             else:
@@ -275,3 +290,22 @@ def upload_products(file,vendor):
         row_num += 1
 
     return products_added, failed_lines
+
+
+def get_random_prod(user):
+    curr_person = get_object_or_404(Person, user=user)
+    curr_preferences = PersPref.objects.filter(user=curr_person)
+
+    # loads possible bought with products eligible to be bought based on
+    # user preferences.
+    possible_bought = []
+    for pref in curr_preferences:
+        tagword_list = pref.tagwords.split(",")
+        for tagword in tagword_list:
+            possible_bought.extend(Products.objects.filter(
+                                   description_contains=tagword
+                                   ).filter(category=pref.category))
+    from random import choice
+    to_be_bought = choice(possible_bought)
+
+    return to_be_bought

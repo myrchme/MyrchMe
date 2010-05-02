@@ -3,7 +3,7 @@
 {%block title %} Inventory {% endblock %}
 
 {% block content %}
-    <h3>{{vendor.company_name}}'s Inventory: </h3>
+    <h3>{{user.username|capfirst}}'s Inventory: </h3>
     {% for product in products %}
       <div>
         ID: {{product.prod_id}} Name: {{product.title}} Price: ${{product.price}}

@@ -30,13 +30,13 @@ def add_categories(filepath="main_site/googles_categories.txt"):
         full_title = ""
         for snippet in line:
             full_title += snippet.strip()+ " > "
-        full_title = full_title.lstrip(" > ")
+        full_title = full_title.rstrip(" > ")
 
         #get the parent category, if there is one
         parent_full_title = ""
         for snippet in line[:-1]:
             parent_full_title += snippet.strip()+ " > "
-        parent_full_title = parent_full_title.lstrip(" > ")
+        parent_full_title = parent_full_title.rstrip(" > ")
         
         if parent_full_title == '': #top-level catagories case
             parent = None

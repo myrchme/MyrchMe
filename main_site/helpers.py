@@ -7,20 +7,21 @@ from django.core.management import setup_environ
 from myrchme import settings
 setup_environ(settings)
 
+import string
+import models
 from django.shortcuts import redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from models import *
 from random import choice
-import string
+
 
 
 def is_person(user):
-    return Person.objects.filter(username=user.username).count()==1
+    return models.Person.objects.filter(username=user.username).count()==1
 
 def is_vendor(user):
-    return Vendor.objects.filter(username=user.username).count()==1
+    return models.Vendor.objects.filter(username=user.username).count()==1
 
 def redirect_logged_in_users(user):
     """
@@ -28,10 +29,9 @@ def redirect_logged_in_users(user):
     Redirects logged in users away from pages they shouldn't see.
     E.g. Registration pages.
     """
-    from myrchme.main_site.models import Person, Vendor
-    if Person.objects.filter(username=user.username).count()==1:
+    if models.Person.objects.filter(username=user.username).count()==1:
         return redirect('/user/'+user.username)
-    elif Vendor.objects.filter(username=user.username).count()==1:
+    elif models.Vendor.objects.filter(username=user.username).count()==1:
         return redirect('/store-profile')
     else:
         return redirect('/logout') #logs out admin users
@@ -40,6 +40,7 @@ def redirect_logged_in_users(user):
 def user_login_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME,
                         user_type='User'):
     """
+    user_login_required:
     Decorator for views that checks that if a certain type of User is logged in,
     redirecting to the log-in page if not.
     """
@@ -66,8 +67,7 @@ def user_login_required(function=None, redirect_field_name=REDIRECT_FIELD_NAME,
 
 def login_user(request, send_to='/profile.html'):
     """
-    login_user:
-    Authenticates the user, logins them in, redirects to send_to.
+    login_user: Authenticates the user, logins them in, redirects to send_to.
     """
     username = request.POST['username']
     password = request.POST['password']
@@ -84,6 +84,9 @@ def login_user(request, send_to='/profile.html'):
 
 
 def generate_key(len=16, key=''):
+    """
+    generate_key: Used to generate 16 character API keys for vendors.
+    """
     chars = string.letters + string.digits
     for i in range(len):
         key = key + choice(chars)

@@ -4,6 +4,9 @@
 
 {% block content %}
     <h3>Upload Products: </h3>
-    {{form}}
-    <div>Instructions and specifications go here</div>
+      <form enctype="multipart/form-data" method="post" action="">
+      {{form}}<br />
+      <input type="submit" value="Upload">
+      </form>
+    <div>Please upload a tab-delimited .txt file.</div>
 {% endblock %}

@@ -122,7 +122,7 @@ class Product(models.Model):
 
     #optional fields
     brand = models.CharField(max_length=50, blank=True, null=True)
-    isbn = models.PositiveIntegerField(max_length=13, blank=True, null=True)
+    isbn = models.CharField(max_length=13, blank=True, null=True)
     upc = models.CharField(max_length=12, blank=True, null=True)
     color = models.CharField(max_length=20, blank=True, null=True)
     size = models.CharField(max_length=3, choices=SIZE_CHOICES , blank=True,
