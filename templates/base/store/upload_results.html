@@ -4,10 +4,14 @@
 
 {% block content %}
     <h3>Upload Results </h3>
-    Number of products successfully added/modified: {{num_added}}
+    <strong>Number of products successfully added/modified: {{num_added}}</strong>
+    <br /><br />
+    Check them out in your<a href="/inventory">inventory.</a>
+
+
     {% for line in failed_lines %}
       <div>
-        Error: {{line}}
+        Error: {% for column in line %}{{column|escape}} {% endfor %}
       </div>
     {% endfor %}
 {% endblock %}

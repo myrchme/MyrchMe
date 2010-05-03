@@ -19,5 +19,7 @@ urlpatterns = patterns('myrchme.main_site.views', #views prefix shortcut
     #Vendor-only URLs
     (r'^store-profile$', 'view_my_store_profile'),
     (r'^inventory$', 'view_inventory'),
+    (r'^delete-all-prods$', 'delete_all_prods'),
+
     (r'^upload$', 'upload_products_view'),
 )

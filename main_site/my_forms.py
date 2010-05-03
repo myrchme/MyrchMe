@@ -119,6 +119,43 @@ class AccountForm(forms.ModelForm):
         person.save()
 
 
+class AccountAddressForm(forms.ModelForm):
+    """
+    AccountAddressForm:
+    """
+    class Meta:
+        model = PhysicalAddress
+
+
+    # update address
+    def update_address(self, user):
+        person = get_object_or_404(Person, user=user)
+        person.shipping_address.street_line1=self.cleaned_data["street_line1"]
+        person.shipping_address.street_line2=self.cleaned_data["street_line2"]
+        person.shipping_address.city=self.cleaned_data["city"]
+        person.shipping_address.zip=self.cleaned_data["zip"]
+        person.shipping_address.country=self.cleaned_data["country"]
+        person.save()
+
+class AccountCreditCardForm(forms.ModelForm):
+    """
+    AccountCreditCardForm:
+    """
+    class Meta:
+        model = CreditCard
+        exclude = ('user','username','join_date','last_login','is_active',
+                   'is_email_subscription'
+        )
+
+    # update credit card information
+    def update_cc(self, user):
+        person = get_object_or_404(Person, user=user)
+        person.credit_card.name_on_card=self.cleaned_data["name_on_card"]
+        person.credit_card.type = self.cleaned_data["type"]
+        person.credit_card.number = self.cleaned_data["number"]
+        person.credit_card.security_code = self.cleaned_data["security_code"]
+        person.credit_card.expiration_date=self.cleaned_data["expiration_date"]
+        person.save()
+
 class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50)
     file  = forms.FileField()

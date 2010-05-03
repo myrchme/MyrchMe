@@ -33,7 +33,8 @@ class Person(models.Model):
         ('MNTH', 'Monthly'),
         ('OFF', 'Off')
     )
-    gift_freq = models.CharField(max_length=4, default='OFF')
+    gift_freq = models.CharField(max_length=4, choices=FREQ_CHOICES,
+                                 default='OFF')
     max_gift_price = models.PositiveIntegerField(max_length=9, default=100)
     min_gift_price = models.PositiveIntegerField(max_length=9, default=0)
 

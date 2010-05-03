@@ -67,10 +67,8 @@ p {margin:5px 0 15px 5px;}
     border-bottom:3px solid #dedede;
 }
 
-
 #content {
 }
-
 
 #footer {
 position: relative;
@@ -79,5 +77,30 @@ border-top:1px solid #dedede;
 clear:both;
 }
 
-
-
+.menu {
+    position:relative;
+    height:35px;
+    width:325px;
+    float:right;
+}
+.menu ul {
+    list-style:none;
+    z-index:10;
+    position:absolute;
+    z-index:100;
+    padding:9px 5px
+}
+.menu li {float:left}
+.menu a, .menu a:active, .menu a:visited {
+    text-decoration:none;
+    color:black;
+    font-size: 18px;
+    padding:10px}
+.menu a:hover {color:gray}
+#slide {
+    position:absolute;
+    top:50px;
+    height:4px;
+    background:#89957a;
+    z-index:10
+}

@@ -5,8 +5,31 @@
 {% block content %}
     <h3>Upload Products: </h3>
       <form enctype="multipart/form-data" method="post" action="">
-      {{form}}<br />
+      Upload a tab-delimited txt file:{{form.file}}<br />
       <input type="submit" value="Upload">
       </form>
-    <div>Please upload a tab-delimited .txt file.</div>
+    <br />
+    <h3>Upload File Specification (read this before uploading!)</h3>
+            <p>For complete, step-by-step instructions on how to make a tab-delimited .txt file, visit <a href="http://www.google.com/support/merchants/bin/answer.py?answer=160588&hl=en">Google Base</a>. For your convenience, our specification is (almost) exactly the same as Google's specification.</p>
+            <h4><b>Required Fields</b></h4>
+            	<ul>
+            		<li><b>Category</b>: Select one from the folowing<a href="http://www.google.com/basepages/producttype/taxonomy.txt">list</a></li>
+            		<li><b>Title</b>: Name of the product (max = 70 characters)</li>
+            		<li><b>Description</b>: Brief description of the product</li>
+            		<li><b>Product ID</b>: Your store's unique int or string indetifier for the product (max = 30 characters)</li>
+            		<li><b>Condition</b>: Either NEW, USED, or REFURB</li>
+            		<li><b>Price</b>: In xx.xx or xx format</li>
+            		<li><b>Link</b>: URL to the product</li>
+            		<li><b>Image URL</b>: URL to the image of the product</li>
+        		</ul>
+        	<h4><b>Optional Fields</b></h4>
+            	<ul>
+            		<li><b>ISBN: </b>max = 13 characters</li>
+            		<li><b>UPC: </b>max = 12 characters</li>
+            		<li><b>Brand: </b>max = 50 characters</li>
+            		<li><b>Color: </b>Any string of your choosing (max = 20 characters)</li>
+            		<li><b>Size: </b>Choose: XS,S,M,L,XL,XXL</li>
+            		<li><b>Gender: </b>Choose: M or F</li>
+        		</ul>
+        	<h4><a href="/site_media/products.txt">Example</a><h4>
 {% endblock %}

@@ -4,10 +4,20 @@
 
 {% block content %}
     <h3>{{user.username|capfirst}}'s Inventory: </h3>
-    {% for product in products %}
-      <div>
-        ID: {{product.prod_id}} Name: {{product.title}} Price: ${{product.price}}
-      </div><br />
-    {% endfor %}
-    <a href="/vendor/delete-all">Delete all products</a>
+    {% if products %}
+        <table>
+            <tr><td>ID</td><td>Title</td><td>Category</td><td>Price</td></tr>
+        {% for product in products %}
+           <tr>
+               <td>{{product.prod_id}}</td>
+               <td>{{product.title}}</td>
+               <td>{{product.category.title}}</td>
+               <td>${{product.price|floatformat:2}}</td>
+           </tr>
+        {% endfor %}
+        </table><br />
+        <a href="/delete-all-prods">Delete all products</a>
+    {% else %}
+        You have no products. Please<a href="/upload">upload</a>some.
+    {% endif %}
 {% endblock %}

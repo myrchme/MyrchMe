@@ -5,9 +5,13 @@
 {% block content %}
     <h2>Welcome {{vendor.rep_first_name}}!</h2><br />
     <h3>Recent transactions: </h3>
-    {% for transaction in transactions %}
-      <div>
-        Date: {{transaction.create_date}} Item: {{transaction.item.title}}
-      </div>
-    {% endfor %}
+    {% if transactions %}
+        {% for transaction in transactions %}
+          <div>
+            Date: {{transaction.create_date}} Item: {{transaction.item.title}}
+          </div>
+        {% endfor %}
+    {% else %}
+        You have no recent transactions. (Step your game up!)
+    {% endif %}
 {% endblock %}

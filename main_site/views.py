@@ -163,7 +163,7 @@ def set_preferences(request):
         if pref_form.is_valid():
             pref_form.save()
             message = "Preferences successfully saved."
-            return render_to_response('base/preferences.html',
+            return render_to_response('base/user/preferences.html',
                 {'preferences':preferences, 'pref_form':pref_form,
                  'message':message})
         else:
@@ -195,6 +195,12 @@ def view_inventory(request):
     invt_dict = {'products':products, 'user':request.user}
 
     return render_to_response('base/store/inventory.html', invt_dict)
+
+@user_login_required(user_type='Vendor')
+def delete_all_prods(request):
+    curr_vendor = get_object_or_404(Vendor, user=request.user)
+    Product.objects.filter(vendor=curr_vendor).delete()
+    return redirect('/inventory')
 
 
 def view_product(request, id):
@@ -231,65 +237,6 @@ def save_file(f, folderpath=UPLOAD_DIR, append=""):
         destination.write(chunk)
     destination.close()
     return filepath
-
-def upload_products(filepath,vendor):
-    import csv
-    reader = csv.reader(open(filepath, 'rU'), dialect='excel-tab')
-    products_added = 0
-    failed_lines = []
-    row_num = 0
-    for line in reader:
-        if row_num==0:
-            header = line
-        else:
-            def add_optional_field(field):
-                return line[header.index(field)] if field in header else None
-
-            #delete any existing product with current prod_id, keeps prod_id
-            #unique for each vendor (remember, these are their IDs, not ours)
-            Product.objects.filter(vendor=vendor, 
-                                   prod_id=line[header.index("prod_id")]
-                                  ).delete()
-            #try getting the Category object associated with this line, skip to
-            #the next iteration/line if we can't find the category
-            try:
-                category = Category.objects.get(full_title=
-                                                line[header.index("category")])
-            except ObjectDoesNotExist:
-                #raise ObjectDoesNotExist
-                failed_lines.append(line)
-                continue
-            try:
-                product, created = Product.objects.get_or_create(
-                    #required fields
-                    vendor = vendor,
-                    category = category,
-                    is_active = True,
-                    title = line[header.index("title")],
-                    description = line[header.index("description")],
-                    prod_id = line[header.index("prod_id")],
-                    condition = line[header.index("condition")],
-                    price = line[header.index("price")],
-                    link = line[header.index("link")],
-                    image_url = line[header.index("image_url")],
-                    #optional fields
-                    isbn = add_optional_field("isbn"),
-                    upc = add_optional_field("upc"),
-                    brand = add_optional_field("brand"),
-                    color = add_optional_field("color"),
-                    size = add_optional_field("size"),
-                    gender = add_optional_field("gender")
-                )
-            except:
-                raise
-
-            if(created):
-                products_added += 1
-            else:
-                failed_lines.append(line)
-        row_num += 1
-
-    return products_added, failed_lines
 
 
 def get_random_prod(user):
