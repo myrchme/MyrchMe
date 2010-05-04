@@ -7,7 +7,7 @@
   <b>Current Preferences:</b><br />
     <ol>
     {% for pref in preferences %}
-     <li><b>{{pref.category.title}}</b>, tags:{{pref.tagwords}}</li>
+     <li><b>{{pref.category.title}}</b> ({{pref.tagwords}})</li>
     {% endfor %}
     </ol><br/>
   <b>Add New Preferences:</b>

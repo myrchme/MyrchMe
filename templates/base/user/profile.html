@@ -4,10 +4,21 @@
 
 {% block content %}
     <h2>{{person.first_name}}'s Profile</h2><br />
+    <h3>{{person.first_name}} likes:</h3>
+    <ul>
+      {% for preference in preferences %}
+        <li><b>{{preference.category.title}}</b> ({{preference.tagwords}})</li>
+    {% endfor %}
+    </ul> 
+    <br/>
     <h3>Recent gifts received: </h3>
     {% for transaction in transactions %}
       <div>
-      	<a href="/product/{{transaction.item.id}}"><img src="/site_media/images/questionmark.png"/></a>
+      	{% if transaction.item.image_url %}
+      	<a href="/product/{{transaction.item.id}}"><img src="{{transaction.item.image_url}}" height="128" width="128"/></a>
+      	{% else %}
+      	<a href="/product/{{transaction.item.id}}"><img src="/site_media/images/questionmark.png" height="128" width="128"/></a>
+      	{% endif %}
       	<br/>
         Date: {{transaction.create_date|date:"n/j/Y"}}
         <br/>

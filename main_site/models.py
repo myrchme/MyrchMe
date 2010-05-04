@@ -41,8 +41,7 @@ class Person(models.Model):
     #To be added: privacy options
 
     def __unicode__(self):
-            return '%s \n %s \n %s %s \n Join Date:%s' % (self.username, "-" *
-        20, self.first_name, self.last_name, self.join_date)
+            return self.username
 
 
 class Vendor(models.Model):
@@ -70,8 +69,7 @@ class Vendor(models.Model):
     api_key = models.CharField(default=generate_key(),max_length=20,unique=True)
 
     def __unicode__(self):
-        return '%s \n %s \n %s %s \n Join Date:%s' % (self.vendor_username,
-            "-"*20, self.rep_first_name, self.rep_last_name, self.join_date)
+        return self.username
 
 
 class Category(models.Model):
@@ -85,7 +83,7 @@ class Category(models.Model):
     parent = models.ForeignKey('self', null=True, default=None)
 
     def __unicode__(self):
-        return '%s' % (self.full_title)
+        return self.full_title
 
 
 SIZE_CHOICES = (
@@ -135,8 +133,7 @@ class Product(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return '%s \n %s \n %s %s \n Create Date:%s' % (self.title,
-            "-"*20, self.vendor, self.prod_id, self.create_date)
+        return str(self.id) + " " + self.title
 
 
 class PersPref(models.Model):
@@ -148,6 +145,9 @@ class PersPref(models.Model):
     tagwords = models.CharField(max_length=500, blank=True)
     history = models.CharField(max_length=500, blank=True)
     size = models.CharField(max_length=3, choices=SIZE_CHOICES, blank=True)
+
+    def __unicode__(self):
+        return str(self.id) + " " + self.category.full_title
 
 
 class Transaction(models.Model):
@@ -167,6 +167,9 @@ class Transaction(models.Model):
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     details = models.CharField(max_length=500, blank=True)
+    
+    def __unicode__(self):
+        return str(self.id) + " " + self.item.title
 
 
 class ProductRating(models.Model):

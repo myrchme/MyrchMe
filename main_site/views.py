@@ -236,7 +236,7 @@ def buy_view(request, id):
     """
     product = get_object_or_404(Product, id=int(escape(id)))
     person = get_object_or_404(Person, user=request.user)
-    vendor = get_object_or_404(Vendor, user=product.vendor)
+    vendor = get_object_or_404(Vendor, user=product.vendor.user)
     transaction = Transaction(buyer=person,
                               vendor=vendor,
                               item=product,
@@ -246,19 +246,22 @@ def buy_view(request, id):
     #make a custom JSON string to send to vendor, real billing info can be
     #added here in the future
     json_data = '{"prod_id":'+ str(product.prod_id)
+    json_data += ',"transaction_id":'+ str(transaction.id)
     json_data += ',"first_name":"'+ person.first_name
     json_data += '","last_name":"' + person.last_name
     json_data += '","cc_number":1'
     json_data += ',"api_key":"'+ str(vendor.api_key) +'"}' #for authentication
 
-    import urllib
+    import urllib, urllib2
     params = urllib.urlencode({'JSON': json_data})
-    f = urllib.urlopen("http://cloud.cs50.net/~blsilver/Vendor1.php", params)
-    if f is not None:
-        message = "Thanks for ordering this item: " + product.title
-        message += "Check your email for a confirmation."
-    else:
+    try:
+        connection = urllib2.urlopen("http://cloud.cs50.net/~blsilver/Vendor1.php", params)
+        connection.close()
+    except urllib2.HTTPError, e:
         message = "Sorry, your purchase didn't go through. Try again later."
+    else:
+        message = "Thanks for ordering this item: <b>" + product.title
+        message += "</b>. <br/>Check your email for a confirmation."
 
     results_dict = {'message': message, 'user':request.user}
 
@@ -266,14 +269,22 @@ def buy_view(request, id):
 
 
 def api_receive_transaction(request):
+    """
+    api_receive_transaction:
+    This function allows vendors to update their transactions
+    """
     if request.method == 'POST':
         json = request.POST["JSON"]
 
         vendor = Vendor.objects.get(username=username)
-        api = vendor.api
+        if api_key == vendor.api_key:
+            a
+        else:
+            return redirect ('/404')
     else:
-        return redirct ('/404')
-    
+        return redirect ('/404')
+
+
 @user_login_required(user_type='Vendor')
 def view_inventory(request):
     """
