@@ -1,5 +1,6 @@
 from django.contrib.auth import logout
 from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.core import serializers
 from myrchme.main_site.models import *
 from myrchme.main_site.my_forms import *
 from myrchme.main_site.helpers import *
@@ -160,7 +161,8 @@ def view_my_store_profile(request):
     view_my_store_profile: Displays Vendor's internal (non-public) profiles.
     """
     curr_vendor = get_object_or_404(Vendor, user=request.user)
-    transactions = Transaction.objects.filter(vendor=curr_vendor)
+    transactions = Transaction.objects.filter(vendor=curr_vendor
+                                            ).exclude(status='FAILED')
     profile_dict = {'vendor':curr_vendor,
                     'transactions':transactions,
                     'user': request.user
@@ -222,6 +224,7 @@ def delete_all_prefs(request):
     PersPref.objects.filter(user=curr_person).delete()
     return redirect ('/preferences')
 
+
 def logout_view(request):
     logout(request)
     return redirect('/')
@@ -236,33 +239,7 @@ def buy_view(request, id):
     """
     product = get_object_or_404(Product, id=int(escape(id)))
     person = get_object_or_404(Person, user=request.user)
-    vendor = get_object_or_404(Vendor, user=product.vendor.user)
-    transaction = Transaction(buyer=person,
-                              vendor=vendor,
-                              item=product,
-                              status='PROCESSING')
-    transaction.save()
-
-    #make a custom JSON string to send to vendor, real billing info can be
-    #added here in the future
-    json_data = '{"prod_id":'+ str(product.prod_id)
-    json_data += ',"transaction_id":'+ str(transaction.id)
-    json_data += ',"first_name":"'+ person.first_name
-    json_data += '","last_name":"' + person.last_name
-    json_data += '","cc_number":1'
-    json_data += ',"api_key":"'+ str(vendor.api_key) +'"}' #for authentication
-
-    import urllib, urllib2
-    params = urllib.urlencode({'JSON': json_data})
-    try:
-        connection = urllib2.urlopen("http://cloud.cs50.net/~blsilver/Vendor1.php", params)
-        connection.close()
-    except urllib2.HTTPError, e:
-        message = "Sorry, your purchase didn't go through. Try again later."
-    else:
-        message = "Thanks for ordering this item: <b>" + product.title
-        message += "</b>. <br/>Check your email for a confirmation."
-
+    message = buy(person, product)
     results_dict = {'message': message, 'user':request.user}
 
     return render_to_response('base/user/buy_results.html', results_dict)
@@ -275,7 +252,8 @@ def api_receive_transaction(request):
     """
     if request.method == 'POST':
         json = request.POST["JSON"]
-
+        for obj in serializers.deserialize("json", json):
+            pass
         vendor = Vendor.objects.get(username=username)
         if api_key == vendor.api_key:
             a
@@ -341,24 +319,3 @@ def upload_products_view(request):
         form = UploadFileForm()
         form_dict = {'form': form,'user':request.user}
         return render_to_response('base/store/upload.html', form_dict)
-
-
-
-def get_random_prod(user):
-    curr_person = get_object_or_404(Person, user=user)
-    curr_preferences = PersPref.objects.filter(user=curr_person)
-
-    # loads possible bought with products eligible to be bought based on
-    # user preferences.
-    possible_bought = []
-    for pref in curr_preferences:
-        tagword_list = pref.tagwords.split(",")
-        for tagword in tagword_list:
-            possible_bought.extend(Products.objects.filter(
-                                   description_contains=tagword
-                                   ).filter(category=pref.category))
-    from random import choice
-    to_be_bought = choice(possible_bought)
-
-    return to_be_bought
-

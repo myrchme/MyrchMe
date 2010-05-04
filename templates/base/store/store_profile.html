@@ -10,13 +10,19 @@
     {% if transactions %}
         {% for transaction in transactions %}
           <div>
-           	<a href="/product/{{transaction.item.id}}"><img src="/site_media/images/questionmark.png"/></a>
+            {% if transaction.item.image_url %}
+      	      <a href="/product/{{transaction.item.id}}"><img src="{{transaction.item.image_url}}" height="128" width="128"/></a>
+            {% else %}
+      	      <a href="/product/{{transaction.item.id}}"><img src="/site_media/images/questionmark.png" height="128" width="128"/></a>
+            {% endif %}
       		<br/>
-        	Date: {{transaction.create_date}}
+        	Date Purchased: {{transaction.create_date|date:"n/j/Y"}}
         	<br/>
         	Item: {{transaction.item.title}}
         	<br/>
         	Price: ${{transaction.item.price|floatformat:2}}
+                <br/>
+                Status: {{transaction.status}}
       	  </div>
         <br/>
         {% endfor %}

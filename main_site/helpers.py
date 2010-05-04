@@ -13,6 +13,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.shortcuts import get_object_or_404
 from random import choice
 
 
@@ -80,6 +81,79 @@ def login_user(request, send_to='/profile.html'):
     else:
         error="Incorrect username or password."
     return error
+
+
+def buy(person, product):
+    """
+    buy:
+    Creates a Transaction, sends to Vendor, Vendor then process the
+    Transaction and updates our DB, then we check the status of the
+    Transaction and return a message for the user.
+    """
+    vendor = get_object_or_404(models.Vendor, user=product.vendor.user)
+    transaction = models.Transaction(buyer=person,
+                              vendor=vendor,
+                              item=product,
+                              status='INITIATED')
+    transaction.save()
+
+    #make a custom JSON string to send to vendor, real billing info can be
+    #added here in the future
+    json_data = '{"prod_id":'+ str(product.prod_id)
+    json_data += ',"transaction_id":'+ str(transaction.id)
+    json_data += ',"first_name":"'+ person.first_name
+    json_data += '","last_name":"' + person.last_name
+    json_data += '","cc_number":1'
+    json_data += ',"api_key":"'+ str(vendor.api_key) +'"}' #for authentication
+
+    import urllib, urllib2
+    params = urllib.urlencode({'JSON': json_data})
+    try:
+        connection = urllib2.urlopen(
+                    "http://cloud.cs50.net/~blsilver/Vendor1.php", params)
+        connection.close()
+    except urllib2.HTTPError, e:  #anything but a 200 status is caught here
+        message = "Sorry, this item is unavailable."
+        #deactivate vendors if their buy API isn't responding
+        vendor.is_active = False
+        vendor.save()
+        #deativate all their products too
+        for product in models.Product.objects.filter(vendor=vendor):
+            product.is_active = False
+            product.save()
+    else:
+        #get updated transaction (Vendor should have updated the DB by now)
+        transaction = models.Transaction.objects.get(id=transaction.id)
+        if transaction.status=='PROCESSING' or transaction.status=='SHIPPED':
+            message = "Thanks for ordering this item: <b>" + product.title
+            message += "</b>. <br/>Check your email for a confirmation."
+        else:
+            message = "Sorry, your purchase failed. Try again later."
+            #TODO:This message isn't very useful. We should tell the user
+            #     why their transaction failed (bad cc number,sold out,etc)
+    return message
+
+
+def get_random_prod(user):
+    """
+    get_random_prod: Returns a random based on a Person's set of preferences.
+    """
+    curr_person = get_object_or_404(models.Person, user=user)
+    curr_preferences = models.PersPref.objects.filter(user=curr_person)
+
+    # loads possible bought with products eligible to be bought based on
+    # user preferences.
+    possible_bought = []
+    for pref in curr_preferences:
+        tagword_list = pref.tagwords.split(",")
+        for tagword in tagword_list:
+            possible_bought.extend(
+                models.Products.objects.filter(description_contains=tagword
+                ).filter(category=pref.category))
+    from random import choice
+    to_be_bought = choice(possible_bought)
+
+    return to_be_bought
 
 
 def upload_products(filepath,vendor):
@@ -154,6 +228,37 @@ def save_file(f, folderpath=settings.UPLOAD_DIR, append=""):
         destination.write(chunk)
     destination.close()
     return filepath
+
+
+def get_random_product(user):
+    """
+    get_random_product:
+    Returns a product randomly selected from the user's set of suitable
+    products.
+    """
+    curr_person = get_object_or_404(models.Person, user=user)
+    curr_preferences = models.PersPref.objects.filter(user=curr_person)
+
+    # loads possible bought with products eligible to be bought based on
+    # user preferences.
+    possible_bought = []
+    for pref in curr_preferences:
+        tagword_list = pref.tagwords.split(",")
+        for tagword in tagword_list:
+            possible_bought.extend(
+                models.Products.objects.filter(description__contains=tagword
+                ).filter(category=pref.category
+                ).filter(price__gte=curr_person.min_price
+                ).filter(price__lte=curr_person.max_price)
+            )
+    if not possible_bought:
+        raise NoMerchForPerson
+    
+    #pick a random product
+    from random import choice
+    to_be_bought = choice(possible_bought)
+
+    return to_be_bought
 
 
 def generate_key(len=16, key=''):

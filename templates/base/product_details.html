@@ -5,10 +5,13 @@
 
 {% block content %}
     <h3>{{product.title}} </h3>
-    
-    <div><img src="/site_media/images/questionmark.png"/></div>
+    {% if product.image_url %}
+      	<div><img src="{{product.image_url}}" height="128" width="128"/></div>
+    {% else %}
+      	<div><img src="/site_media/images/questionmark.png" height="128" width="128"/></div>
+    {% endif %}
     <div>Price: ${{product.price|floatformat:2}}</div>
-    <div>Description: {{product.description}}</div>
+    <div>{{product.description}}</div>
     <a href="/buy/{{product.id}}">Buy this item</a>
 
 {% endblock %}

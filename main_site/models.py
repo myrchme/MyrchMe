@@ -161,9 +161,11 @@ class Transaction(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     STATUS_CHOICES = (
+        ('INITIATED', 'Initiated'),
         ('PROCESSING', 'Processing'),
         ('SHIPPED', 'Shipped'),
-        ('DELIVERED', 'Delivered')
+        ('DELIVERED', 'Delivered'),
+        ('FAILED', 'Failed')
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     details = models.CharField(max_length=500, blank=True)

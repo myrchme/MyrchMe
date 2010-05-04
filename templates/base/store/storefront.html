@@ -7,10 +7,16 @@
     <h2>{{vendor.company_name}}</h2><br />
     <h3>Popular {{vendor.company_name}} products: </h3>
     {% for product in top_items %}
-      <div><a href="/product/{{product.id}}"><img src="/site_media/images/questionmark.png"/></a></div>
+      <div>
+      {% if product.image_url %}
+        <a href="/product/{{product.id}}"><img src="{{product.image_url}}" height="128" width="128"/></a>
+      {% else %}
+        <a href="/product/{{product.id}}"><img src="/site_media/images/questionmark.png" height="128" width="128"/></a>
+      {% endif %}
+      </div>
       <div><strong>{{product.title}}</strong></div>
       <div>Price: ${{product.price|floatformat:2}}</div>
-      <div> Rating: {{product.avg_rating}}</div>
+      <!--<div> Rating: {{product.avg_rating}}</div>-->
       <br />
     {% endfor %}
 {% endblock %}
