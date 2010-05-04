@@ -142,6 +142,20 @@ def upload_products(filepath,vendor):
     return products_added, failed_lines
 
 
+def save_file(f, folderpath=UPLOAD_DIR, append=""):
+    """
+    save_file:
+    When given a file in memory and a directory path, this writes the file to
+    the directory and returns its filepath.
+    """
+    filepath = folderpath + append + "_" + f.name
+    destination = open(filepath, 'wb+')
+    for chunk in f.chunks():
+        destination.write(chunk)
+    destination.close()
+    return filepath
+
+
 def generate_key(len=16, key=''):
     """
     generate_key: Used to generate 16 character API keys for vendors.

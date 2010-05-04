@@ -145,7 +145,7 @@ def update_credit_card(request):
 def view_person_profile(request, username): #request MUST be an arg here or
                                             #function fails
     """
-    view_person_profile:
+    view_person_profile: Displays a Person's public profile
     """
     curr_person = get_object_or_404(Person, username=escape(username))
     preferences = PersPref.objects.filter(user=curr_person)
@@ -163,8 +163,7 @@ def view_person_profile(request, username): #request MUST be an arg here or
 @user_login_required(user_type='Vendor')
 def view_my_store_profile(request):
     """
-    view_my_store_profile:
-    Displays Vendor's internal (non-public) profiles.
+    view_my_store_profile: Displays Vendor's internal (non-public) profiles.
     """
     curr_vendor = get_object_or_404(Vendor, user=request.user)
     transactions = Transaction.objects.filter(vendor=curr_vendor)
@@ -274,6 +273,9 @@ def buy_view(request, id):
     
 @user_login_required(user_type='Vendor')
 def view_inventory(request):
+    """
+    view_inventory: Displays a Vendor's inventory.
+    """
     curr_vendor = get_object_or_404(Vendor, user=request.user)
     products = Product.objects.filter(vendor=curr_vendor)
     invt_dict = {'products':products, 'user':request.user}
@@ -283,11 +285,18 @@ def view_inventory(request):
 
 @user_login_required(user_type='Vendor')
 def delete_all_prods(request):
+    """
+    delete_all_prods: Delets all products in a vendor's inventory.
+    """
     curr_vendor = get_object_or_404(Vendor, user=request.user)
     Product.objects.filter(vendor=curr_vendor).delete()
     return redirect('/inventory')
 
+
 def view_product(request, id):
+    """
+    view_product: Displays product details page.
+    """
     product = get_object_or_404(Product, id=id)
     prod_dict = {'product':product, 'user':request.user}
     
@@ -296,6 +305,10 @@ def view_product(request, id):
 
 @user_login_required(user_type='Vendor')
 def upload_products_view(request):
+    """
+    Displays and processes form for uploading tab-delimited txt files that
+    contain a Vendor's products.
+    """
     curr_vendor = get_object_or_404(Vendor, user=request.user)
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -303,24 +316,18 @@ def upload_products_view(request):
            folderpath = UPLOAD_DIR + "vendor/"
            filepath = save_file(request.FILES['file'], folderpath,
                                 request.user.username)
+           #this line is where products are added to the db
            num_added, failed_lines = upload_products(filepath, curr_vendor)
            results_dict = {'num_added':num_added,
                            'failed_lines':failed_lines,
                            'user':request.user}
-           return render_to_response('base/store/upload_results.html', results_dict)
+           return render_to_response('base/store/upload_results.html',
+                                     results_dict)
     else:
         form = UploadFileForm()
         form_dict = {'form': form,'user':request.user}
         return render_to_response('base/store/upload.html', form_dict)
 
-
-def save_file(f, folderpath=UPLOAD_DIR, append=""):
-    filepath = folderpath + append + "_" + f.name
-    destination = open(filepath, 'wb+')
-    for chunk in f.chunks():
-        destination.write(chunk)
-    destination.close()
-    return filepath
 
 
 def get_random_prod(user):
