@@ -7,8 +7,13 @@
     <h3>Recent gifts received: </h3>
     {% for transaction in transactions %}
       <div>
-        Date: {{transaction.create_date}} Item: {{transaction.item.title}}
+      	<a href="/product/{{transaction.item.id}}"><img src="/site_media/images/questionmark.png"/></a>
+      	<br/>
+        Date: {{transaction.create_date|date:"n/j/Y"}}
+        <br/>
+        Item: {{transaction.item.title}}
       </div>
+      <br/>
     {% endfor %}
 
 {% endblock %}

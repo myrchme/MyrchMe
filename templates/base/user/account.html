@@ -3,5 +3,39 @@
 {%block title %} Edit Account {% endblock %}
 
 {% block content %}
-    {{form}}
+  <form method="POST" action="">
+    <h3>Edit Account</h3>
+    First Name: {{accountform.first_name}}
+    <br/>
+    Last Name: {{accountform.last_name}}
+    <br/>
+    Gender: {{accountform.gender}}
+    <br/>
+    Gift Frequency: {{accountform.gift_freq}}
+    <br/>
+    Min Gift Price: ${{accountform.min_gift_price}}
+    <br/>
+    Max Gift Price: ${{accountform.max_gift_price}}
+    <br/>
+    <br/>
+    {{accountform.errors}}
+    <strong>Shipping Address:</strong><br/>
+    Street Line 1: {{addressform.street_line1}}
+    <br/>
+    Street Line 2: {{addressform.street_line2}} (optional)
+    <br/>
+    City: {{addressform.city}}
+    <br/>
+    State: {{addressform.state}}
+    <br/>
+    Zip Code: {{addressform.zip}}
+    <br/>
+    Country: {{addressform.country}}
+    <br/>
+    {{addressform.errors}}
+    <br/>
+    Update All: <input type="submit" value="Update Account">
+  </form>
+  <br/><br/>
+  <strong><a href="/credit-card">Edit Credit Card Info</a></strong><br/>
 {% endblock %}

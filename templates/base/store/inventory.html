@@ -1,12 +1,14 @@
 {% extends "base/base.html" %}
 
 {%block title %} Inventory {% endblock %}
+{% block menu %} {% include "base/vendor_menu.html" %} {% endblock %}
 
 {% block content %}
     <h3>{{user.username|capfirst}}'s Inventory: </h3>
     {% if products %}
-        <table>
-            <tr><td>ID</td><td>Title</td><td>Category</td><td>Price</td></tr>
+    <table>
+            <tr><td class="th">ID</td><td class="th">Title</td><td class="th">Category</td><td class="th">Price</td></tr>
+            <tr><td height="10px"></td></tr>
         {% for product in products %}
            <tr>
                <td>{{product.prod_id}}</td>

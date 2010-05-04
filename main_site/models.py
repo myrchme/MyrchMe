@@ -141,8 +141,7 @@ class Product(models.Model):
 
 class PersPref(models.Model):
     """
-    PersPref:
-    Stores a users preferences to generate item choice.
+    PersPref: Stores a users preferences to generate item choice.
     """
     user = models.ForeignKey(Person)
     category = models.ForeignKey(Category)
@@ -223,4 +222,4 @@ class CreditCard(models.Model):
     number = models.PositiveIntegerField(max_length=16)
     security_code = models.PositiveIntegerField(max_length=3)
     expiration_date = models.DateField()
-    billing_address = models.ForeignKey('PhysicalAddress')
+    billing_address = models.ForeignKey('PhysicalAddress', null=True)

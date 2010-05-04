@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.core import serializers
 from django.contrib.auth import logout
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.forms.models import inlineformset_factory
@@ -15,8 +16,7 @@ from cgi import escape
 
 def index(request):
     """
-    index:
-    Main page logic.
+    index: Main page logic.
     """
     if request.user.id:
         return redirect_logged_in_users(request.user)
@@ -86,16 +86,60 @@ def register_vendor(request):
 
 
 @user_login_required(user_type='Person')
-def change_person_account(request):
+def update_person_account(request):
     """
-    change_person_account:
+    update_person_account:
+    Displays and processes form for editing basic person info.
     """
     curr_person = get_object_or_404(Person, user=request.user)
-    
-    #initialize form fields with curr_person data
-    form = AccountForm(instance=curr_person)
-    account_dict= {'form':form,'user':request.user}
+
+    if request.method == 'POST':
+        accountform = AccountForm(request.POST)
+        addressform = AddressForm(request.POST)
+        if accountform.is_valid():
+            accountform.save(request.user)
+        if addressform.is_valid():
+            addressform.update_acc_address(request.user)
+    else:
+        #initialize form fields with curr_person data
+        accountform = AccountForm(instance=curr_person)
+        addressform = AddressForm(instance=curr_person.shipping_address)
+
+    account_dict = {'accountform':accountform,
+                    'addressform':addressform,
+                    'user':request.user
+    }
     return render_to_response('base/user/account.html', account_dict)
+
+
+@user_login_required(user_type='Person')
+def update_credit_card(request):
+    """
+    update_credit_card:
+    Displays and processes form for editing credit card info.
+    """
+    curr_person = get_object_or_404(Person, user=request.user)
+
+    if request.method == 'POST':
+        cc_form = CreditCardForm(request.POST)
+        cc_add_form = AddressForm(request.POST)
+        if cc_form.is_valid():
+            cc_form.save(request.user)
+        if cc_add_form.is_valid():
+            cc_add_form.update_cc_address(request.user)
+    else:
+        cc_form = CreditCardForm(instance=curr_person.credit_card)
+        try:
+            cc_add_form = AddressForm(
+                            instance=curr_person.credit_card.billing_address)
+        except AttributeError:  #catches the case when the user has no CC yet
+            cc_add_form = AddressForm()
+
+    cc_dict = {'cc_form':cc_form,
+               'cc_add_form':cc_add_form,
+               'user':request.user
+    }
+    return render_to_response('base/user/credit_card.html', cc_dict)
 
 
 def view_person_profile(request, username): #request MUST be an arg here or
@@ -105,7 +149,9 @@ def view_person_profile(request, username): #request MUST be an arg here or
     """
     curr_person = get_object_or_404(Person, username=escape(username))
     preferences = PersPref.objects.filter(user=curr_person)
-    transactions = Transaction.objects.filter(buyer=curr_person)
+    #only display gifts that have been delivered so we don't ruin the surprise
+    transactions = Transaction.objects.filter(buyer=curr_person).filter(
+                                                             status='DELIVERED')
     profile_dict= { 'person':curr_person,
                     'preferences':preferences,
                     'transactions':transactions,
@@ -117,7 +163,8 @@ def view_person_profile(request, username): #request MUST be an arg here or
 @user_login_required(user_type='Vendor')
 def view_my_store_profile(request):
     """
-    view_store_profile:
+    view_my_store_profile:
+    Displays Vendor's internal (non-public) profiles.
     """
     curr_vendor = get_object_or_404(Vendor, user=request.user)
     transactions = Transaction.objects.filter(vendor=curr_vendor)
@@ -131,7 +178,7 @@ def view_my_store_profile(request):
 
 def view_store(request, username):
     """
-    view_store
+    view_store: Displays public storefront, with store's products.
     """
     curr_vendor = get_object_or_404(Vendor, username=escape(username))
 
@@ -148,34 +195,39 @@ def view_store(request, username):
 
 
 @user_login_required(user_type='Person')
-def set_preferences(request):
+def update_preferences(request):
     """
-    set_preferences
+    update_preferences: Displays a form for adding and deleting PersPrefs.
     """
     curr_person = get_object_or_404(Person, user=request.user)
     preferences = PersPref.objects.filter(user=curr_person)
-
-    PersPrefFormSet = inlineformset_factory(Person, PersPref, max_num=1)
-    pref_form = PersPrefFormSet(instance=curr_person)
+    pref_form = PreferenceForm()
     
     if request.method == 'POST':
-        pref_form = PersPrefFormSet(request.POST, instance=curr_person)
+        pref_form = PreferenceForm(request.POST)
         if pref_form.is_valid():
-            pref_form.save()
+            pref_form.save(request.user)
             message = "Preferences successfully saved."
             return render_to_response('base/user/preferences.html',
-                {'preferences':preferences, 'pref_form':pref_form,
-                 'message':message})
-        else:
-            pref_form.error = pref_form.errors
+                {'preferences':preferences, 'form':pref_form,
+                 'message':message, 'user':request.user})
 
     pref_dict = {'preferences':preferences,
-                 'pref_form':pref_form,
+                 'form':pref_form,
                  'errors':pref_form.errors,
                  'user':request.user
     }        
     return render_to_response('base/user/preferences.html', pref_dict)
 
+
+@user_login_required(user_type='Person')
+def delete_all_prefs(request):
+    """
+    delete_all_prefs: Delete all of a Person's preferences.
+    """
+    curr_person = get_object_or_404(Person, user=request.user)
+    PersPref.objects.filter(user=curr_person).delete()
+    return redirect ('/preferences')
 
 def logout_view(request):
     logout(request)
@@ -184,10 +236,42 @@ def logout_view(request):
 
 @user_login_required(user_type='Person')
 def buy_view(request, id):
-    #TODO: make a remote buy request
-    return redirect('/')
+    """
+    buy_view:
+    Creates a transaction object, serializes it to a JSON object, and sends
+    to vendor's remote server for completion.
+    """
+    product = get_object_or_404(Product, id=int(id))
+    person = get_object_or_404(Person, user=request.user)
+    vendor = get_object_or_404(Vendor, user=product.vendor)
+    transaction = Transaction(buyer=person,
+                              vendor=vendor,
+                              item=product,
+                              status='PROCESSING')
+    transaction.save()
 
+    #make a custom JSON string to send to vendor, real billing info can be
+    #added here in the future
+    json_data = '{"prod_id":'+ str(product.prod_id)
+    json_data += ',"first_name":"'+ person.first_name
+    json_data += '","last_name":"' + person.last_name
+    json_data += '","cc_number":1'
+    json_data += ',"api_key":"'+ str(vendor.api_key) +'"}' #for authentication
 
+    import urllib
+    params = urllib.urlencode({'JSON': json_data})
+    f = urllib.urlopen("http://cloud.cs50.net/~blsilver/Vendor1.php", params)
+    if f is not None:
+        message = "Thanks for ordering this item: " + product.title
+        message += "Check your email for a confirmation."
+    else:
+        message = "Sorry, your purchase didn't go through. Try again later."
+
+    results_dict = {'message': message, 'user':request.user}
+
+    return render_to_response('base/user/buy_results.html', results_dict)
+
+    
 @user_login_required(user_type='Vendor')
 def view_inventory(request):
     curr_vendor = get_object_or_404(Vendor, user=request.user)
@@ -196,12 +280,12 @@ def view_inventory(request):
 
     return render_to_response('base/store/inventory.html', invt_dict)
 
+
 @user_login_required(user_type='Vendor')
 def delete_all_prods(request):
     curr_vendor = get_object_or_404(Vendor, user=request.user)
     Product.objects.filter(vendor=curr_vendor).delete()
     return redirect('/inventory')
-
 
 def view_product(request, id):
     product = get_object_or_404(Product, id=id)
@@ -256,3 +340,4 @@ def get_random_prod(user):
     to_be_bought = choice(possible_bought)
 
     return to_be_bought
+

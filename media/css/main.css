@@ -59,6 +59,10 @@ p {margin:5px 0 15px 5px;}
 
 }
 
+.th {
+    font-weight: bold;
+    font-size: 20px;
+}
 #siteContainer {
     margin: 5px 25px 15px 25px;
 }
@@ -80,7 +84,7 @@ clear:both;
 .menu {
     position:relative;
     height:35px;
-    width:325px;
+    width:362px;
     float:right;
 }
 .menu ul {

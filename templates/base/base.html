@@ -22,10 +22,11 @@
      </div>
      <div style="float:right">
          {% block top_right %}
-            {% if user.id %}
+            {% if user.username %}
               <div style="text-align: right;">Logged in as <strong>{{user.username}}</strong> |
               <a href="/logout">Logout</a>
               </div>
+              {% block menu %}
               <div class="menu">
                 <ul id="menu">
                 <li><a href="/user/{{user.username}}">My Profile</a></li>
@@ -34,7 +35,7 @@
                 </ul>
                 <div id="slide"></div>
                </div>
-
+			  {% endblock %}
             {% else %}
               <h2><a href="/">Login</a></h2>
             {% endif %}

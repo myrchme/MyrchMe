@@ -1,0 +1,39 @@
+{% extends "base/base.html" %}
+
+{%block title %} Edit Credit Card Details {% endblock %}
+
+{% block content %}
+  <form method="POST" action="">
+  <h3>Edit Credit Card Details</h3>
+    <strong>Credit Card Info:</strong><br/>
+    Name on Card: {{cc_form.name_on_card}}
+    <br/>
+    Type: {{cc_form.type}}
+    <br/>
+    Number: {{cc_form.number}}
+    <br/>
+    Security Code: {{cc_form.security_code}} (3 digits)
+    <br/>
+    Expiration date: {{cc_form.expiration_date}} (mm/dd/yyyy)
+    <br/>
+    {{cc_form.errors}}
+    <br/><br/>
+    <strong>Billing Address:</strong><br/>
+    Street Line 1: {{cc_add_form.street_line1}}
+    <br/>
+    Street Line 2: {{cc_add_form.street_line2}} (optional)
+    <br/>
+    City: {{cc_add_form.city}}
+    <br/>
+    State: {{cc_add_form.state}}
+    <br/>
+    Zip Code: {{cc_add_form.zip}}
+    <br/>
+    Country: {{cc_add_form.country}}
+    <br/>
+    {{cc_add_form.errors}}
+    <br/>
+    Update All: <input type="submit" value="Update Credit Card">
+    <br/><br/>
+  </form>
+{% endblock %}

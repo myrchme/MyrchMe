@@ -1,11 +1,14 @@
 {% extends "base/base.html" %}
 
 {%block title %} {{product.title}} {% endblock %}
+{% block menu %} {% endblock %}
 
 {% block content %}
     <h3>{{product.title}} </h3>
-    <div>Price:{{product.price}}</div>
+    
+    <div><img src="/site_media/images/questionmark.png"/></div>
+    <div>Price: ${{product.price|floatformat:2}}</div>
     <div>Description: {{product.description}}</div>
-    <a href="buy/{{product.id}}">Buy this item</a>
+    <a href="/buy/{{product.id}}">Buy this item</a>
 
 {% endblock %}

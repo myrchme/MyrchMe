@@ -2,6 +2,7 @@
 my_forms.py
 Handles our forms.
 """
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render_to_response
 from django.contrib.auth import login, authenticate
 from string import capitalize
@@ -14,6 +15,7 @@ from django.contrib.auth.models import User
 class LoginForm(forms.Form):
     """
     LoginForm:
+    Login form that validates the user.
     """
     username = forms.CharField(label=('Username:'), max_length=100)
     password = forms.CharField(label=('Password:'), widget=forms.PasswordInput)
@@ -55,6 +57,7 @@ class RegisterForm(forms.ModelForm):
 class RegisterPersonForm(RegisterForm):
     """
     RegisterPersonForm:
+    Form used to create Persons.
     """
     class Meta:
         model = Person
@@ -75,6 +78,7 @@ class RegisterPersonForm(RegisterForm):
 class RegisterVendorForm(RegisterForm):
     """
     RegisterVendorForm:
+    Form used to create Vendors.
     """
     class Meta:
         model = Vendor
@@ -99,63 +103,161 @@ class RegisterVendorForm(RegisterForm):
 class AccountForm(forms.ModelForm):
     """
     AccountForm:
+    Form to handle account creation and updating.
     """
     class Meta:
         model = Person
         exclude = ('user','username','join_date','last_login','is_active',
-                   'is_email_subscription'
-        )
+                   'email_primary')
 
-    def update_account(self, user):
+    def save(self, user):
         # save updated Person
-        person = get_object_or_404(Person, user=user)
-        person.first_name = capitalize(self.cleaned_data["first_name"])
-        person.last_name = capitalize(self.cleaned_data["last_name"])
-        person.gender = self.cleaned_data["gender"]
-        person.email_primary = self.cleaned_data["email_primary"]
-        person.gift_freq = self.cleaned_data["gift_freq"]
-        person.max_gift_price = self.cleaned_data["max_gift_price"]
-        person.min_gift_price = self.cleaned_data["min_gift_price"]
-        person.save()
+        try:
+            person = Person.objects.get(user=user)
+        except ObjectDoesNotExist:
+            return redirect('/')
+        else:
+            person.first_name = capitalize(self.cleaned_data["first_name"])
+            person.last_name = capitalize(self.cleaned_data["last_name"])
+            person.gender = self.cleaned_data["gender"]
+            person.gift_freq = self.cleaned_data["gift_freq"]
+            person.max_gift_price = self.cleaned_data["max_gift_price"]
+            person.min_gift_price = self.cleaned_data["min_gift_price"]
+            person.save()
 
 
-class AccountAddressForm(forms.ModelForm):
+class CreditCardForm(forms.ModelForm):
     """
-    AccountAddressForm:
+    CreditCardForm:
+    Form to handle credit card creation and editing.
+    """
+    class Meta:
+        model = CreditCard
+        exclude = ('billing_address')
+
+    # update credit card information, create cc is user doesn't have one
+    def save(self, user):
+        try:
+            person = Person.objects.get(user=user)
+        except ObjectDoesNotExist:
+            return redirect('/')
+        cc = person.credit_card
+        if cc is None:
+            address = PhysicalAddress()
+            address = person.shipping_address
+            address.save()
+            cc = CreditCard(name_on_card=self.cleaned_data["name_on_card"],
+                            type = self.cleaned_data["type"],
+                            number = self.cleaned_data["number"],
+                            security_code = self.cleaned_data["security_code"],
+                            expiration_date=self.cleaned_data["expiration_date"],
+                            billing_address= address
+            )
+            cc.save()
+            person.credit_card = cc
+            person.save()
+        else:
+            cc.name_on_card = self.cleaned_data["name_on_card"]
+            cc.type = self.cleaned_data["type"]
+            cc.number = self.cleaned_data["number"]
+            cc.security_code = self.cleaned_data["security_code"]
+            cc.expiration_date = self.cleaned_data["expiration_date"]
+            cc.save()
+
+
+class AddressForm(forms.ModelForm):
+    """
+    AddressForm:
+    Form to handle account credit card address creation and editing.
     """
     class Meta:
         model = PhysicalAddress
 
+    # update credit card addresses
+    def update_cc_address(self, user):
+        try:
+            person = Person.objects.get(user=user)
+        except ObjectDoesNotExist:
+            return redirect('/')
+        cc_address = person.credit_card.billing_address
+        if cc_address is None:
+            cc_address = PhysicalAddress(
+                street_line1 = self.cleaned_data["street_line1"],
+                street_line2 = self.cleaned_data["street_line2"],
+                city = self.cleaned_data["city"],
+                zip = self.cleaned_data["zip"],
+                state = self.cleaned_data["state"],
+                country = self.cleaned_data["country"]
+            )
+            cc_address.save()
+            person.credit_card.billing_address = cc_address #this might break?
+            person.save()
+        else:
+            cc_address.street_line1 = self.cleaned_data["street_line1"]
+            cc_address.street_line2 = self.cleaned_data["street_line2"]
+            cc_address.city = self.cleaned_data["city"]
+            cc_address.zip = self.cleaned_data["zip"]
+            cc_address.state = self.cleaned_data["state"]
+            cc_address.country = self.cleaned_data["country"]
+            cc_address.save()
 
-    # update address
-    def update_address(self, user):
-        person = get_object_or_404(Person, user=user)
-        person.shipping_address.street_line1=self.cleaned_data["street_line1"]
-        person.shipping_address.street_line2=self.cleaned_data["street_line2"]
-        person.shipping_address.city=self.cleaned_data["city"]
-        person.shipping_address.zip=self.cleaned_data["zip"]
-        person.shipping_address.country=self.cleaned_data["country"]
-        person.save()
+    # update account addresses (shipping addresses)
+    def update_acc_address(self, user):
+        try:
+            person = Person.objects.get(user=user)
+        except ObjectDoesNotExist:
+            return redirect('/')
+        # checks for an address, updates it if found, if not, creates a new one
 
-class AccountCreditCardForm(forms.ModelForm):
+        address = person.shipping_address
+        if address is None:
+            address = PhysicalAddress(
+                street_line1 = self.cleaned_data["street_line1"],
+                street_line2 = self.cleaned_data["street_line2"],
+                city = self.cleaned_data["city"],
+                zip = self.cleaned_data["zip"],
+                state = self.cleaned_data["state"],
+                country = self.cleaned_data["country"]
+            )
+            address.save()
+            person.shipping_address = address
+            person.save()
+        else:
+            address.street_line1 = self.cleaned_data["street_line1"]
+            address.street_line2 = self.cleaned_data["street_line2"]
+            address.city = self.cleaned_data["city"]
+            address.zip = self.cleaned_data["zip"]
+            address.state = self.cleaned_data["state"]
+            address.country = self.cleaned_data["country"]
+            address.save()
+
+
+class PreferenceForm(forms.ModelForm):
     """
-    AccountCreditCardForm:
+    PreferenceForm: Form to handle the creation of new PersPrefs.
     """
     class Meta:
-        model = CreditCard
-        exclude = ('user','username','join_date','last_login','is_active',
-                   'is_email_subscription'
-        )
+        model = PersPref
+        exclude = ('user')
 
-    # update credit card information
-    def update_cc(self, user):
-        person = get_object_or_404(Person, user=user)
-        person.credit_card.name_on_card=self.cleaned_data["name_on_card"]
-        person.credit_card.type = self.cleaned_data["type"]
-        person.credit_card.number = self.cleaned_data["number"]
-        person.credit_card.security_code = self.cleaned_data["security_code"]
-        person.credit_card.expiration_date=self.cleaned_data["expiration_date"]
-        person.save()
+    # adds a PersPref to the DB
+    def save(self, user):
+        try:
+            person = Person.objects.get(user=user)
+        except ObjectDoesNotExist:
+            return redirect('/')
+        else:
+            perspref = PersPref(user = person,
+                                category = self.cleaned_data["category"],
+                                tagwords = self.cleaned_data["tagwords"],
+                                history = self.cleaned_data["history"],
+                                size = self.cleaned_data["size"]
+            )
+            perspref.save()
+
 
 class UploadFileForm(forms.Form):
+    """
+    UploadFileForm: Form for uploading files (CSV).
+    """
     file  = forms.FileField()

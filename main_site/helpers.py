@@ -16,7 +16,6 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from random import choice
 
 
-
 def is_person(user):
     return models.Person.objects.filter(username=user.username).count()==1
 

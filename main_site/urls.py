@@ -13,8 +13,10 @@ urlpatterns = patterns('myrchme.main_site.views', #views prefix shortcut
     
     #Person-only URLs
     (r'^buy/(?P<id>.*)$', 'buy_view'), #TODO: make this SEO-friendly, use slugs
-    (r'^account$', 'change_person_account'),
-    (r'^preferences$', 'set_preferences'),
+    (r'^account$', 'update_person_account'),
+    (r'^credit-card$', 'update_credit_card'),
+    (r'^preferences$', 'update_preferences'),
+    (r'^delete-all-prefs$', 'delete_all_prefs'),
 
     #Vendor-only URLs
     (r'^store-profile$', 'view_my_store_profile'),
