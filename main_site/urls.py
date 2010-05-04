@@ -22,6 +22,9 @@ urlpatterns = patterns('myrchme.main_site.views', #views prefix shortcut
     (r'^store-profile$', 'view_my_store_profile'),
     (r'^inventory$', 'view_inventory'),
     (r'^delete-all-prods$', 'delete_all_prods'),
-
     (r'^upload$', 'upload_products_view'),
+
+    #Receving API
+    (r'^api/receive$', 'api_receive_transaction'),
+
 )

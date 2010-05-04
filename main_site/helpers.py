@@ -142,7 +142,7 @@ def upload_products(filepath,vendor):
     return products_added, failed_lines
 
 
-def save_file(f, folderpath=UPLOAD_DIR, append=""):
+def save_file(f, folderpath=settings.UPLOAD_DIR, append=""):
     """
     save_file:
     When given a file in memory and a directory path, this writes the file to

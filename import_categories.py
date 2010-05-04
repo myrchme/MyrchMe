@@ -53,7 +53,7 @@ def add_categories(filepath="main_site/googles_categories.txt"):
 
 
 #Makes this file into an executable script
-#Usage: import_categories.py <filepath>
+#Usage: python import_categories.py <filepath>
 if __name__ == "__main__":
     import sys
     try:

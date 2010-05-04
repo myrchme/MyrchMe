@@ -1,6 +1,6 @@
 """
 my_forms.py
-Handles our forms.
+Handles custom form creation, processing, and saving.
 """
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render_to_response
@@ -14,8 +14,7 @@ from django.contrib.auth.models import User
 
 class LoginForm(forms.Form):
     """
-    LoginForm:
-    Login form that validates the user.
+    LoginForm: Login form that validates the user.
     """
     username = forms.CharField(label=('Username:'), max_length=100)
     password = forms.CharField(label=('Password:'), widget=forms.PasswordInput)
@@ -40,8 +39,7 @@ class LoginForm(forms.Form):
 
 class RegisterForm(forms.ModelForm):
     """
-    RegisterForm:
-    Parent form used for creating Persons and Vendors.
+    RegisterForm: Parent form used for creating Persons and Vendors.
     """
     password = forms.CharField(label=('password'), widget=forms.PasswordInput)
 
@@ -56,8 +54,7 @@ class RegisterForm(forms.ModelForm):
 
 class RegisterPersonForm(RegisterForm):
     """
-    RegisterPersonForm:
-    Form used to create Persons.
+    RegisterPersonForm: Form used to create Persons.
     """
     class Meta:
         model = Person
@@ -77,8 +74,7 @@ class RegisterPersonForm(RegisterForm):
 
 class RegisterVendorForm(RegisterForm):
     """
-    RegisterVendorForm:
-    Form used to create Vendors.
+    RegisterVendorForm: Form used to create Vendors.
     """
     class Meta:
         model = Vendor
@@ -102,8 +98,7 @@ class RegisterVendorForm(RegisterForm):
 
 class AccountForm(forms.ModelForm):
     """
-    AccountForm:
-    Form to handle account creation and updating.
+    AccountForm: Form to handle account creation and updating.
     """
     class Meta:
         model = Person
@@ -128,8 +123,7 @@ class AccountForm(forms.ModelForm):
 
 class CreditCardForm(forms.ModelForm):
     """
-    CreditCardForm:
-    Form to handle credit card creation and editing.
+    CreditCardForm: Form to handle credit card creation and editing.
     """
     class Meta:
         model = CreditCard

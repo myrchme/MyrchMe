@@ -1,17 +1,10 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.core import serializers
 from django.contrib.auth import logout
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.forms.models import inlineformset_factory
 from myrchme.main_site.models import *
 from myrchme.main_site.my_forms import *
 from myrchme.main_site.helpers import *
-from myrchme.settings import UPLOAD_DIR
+from myrchme import settings
 from cgi import escape
-#HTTP rendering tools
-#Django Authentication stuff
-#from django.contrib.auth.decorators import login_required
-#from django.contrib.auth.forms import SetPasswordForm
 
 
 def index(request):
@@ -147,6 +140,7 @@ def view_person_profile(request, username): #request MUST be an arg here or
     """
     view_person_profile: Displays a Person's public profile
     """
+    #escape() used to sanitize user input
     curr_person = get_object_or_404(Person, username=escape(username))
     preferences = PersPref.objects.filter(user=curr_person)
     #only display gifts that have been delivered so we don't ruin the surprise
@@ -240,7 +234,7 @@ def buy_view(request, id):
     Creates a transaction object, serializes it to a JSON object, and sends
     to vendor's remote server for completion.
     """
-    product = get_object_or_404(Product, id=int(id))
+    product = get_object_or_404(Product, id=int(escape(id)))
     person = get_object_or_404(Person, user=request.user)
     vendor = get_object_or_404(Vendor, user=product.vendor)
     transaction = Transaction(buyer=person,
@@ -270,6 +264,15 @@ def buy_view(request, id):
 
     return render_to_response('base/user/buy_results.html', results_dict)
 
+
+def api_receive_transaction(request):
+    if request.method == 'POST':
+        json = request.POST["JSON"]
+
+        vendor = Vendor.objects.get(username=username)
+        api = vendor.api
+    else:
+        return redirct ('/404')
     
 @user_login_required(user_type='Vendor')
 def view_inventory(request):
@@ -313,7 +316,7 @@ def upload_products_view(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-           folderpath = UPLOAD_DIR + "vendor/"
+           folderpath = settings.UPLOAD_DIR + "vendor/"
            filepath = save_file(request.FILES['file'], folderpath,
                                 request.user.username)
            #this line is where products are added to the db
