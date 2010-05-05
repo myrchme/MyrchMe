@@ -251,14 +251,13 @@ def api_receive_transaction(request):
     This function allows vendors to update their transactions
     """
     if request.method == 'POST':
-        json = request.POST["JSON"]
-        for obj in serializers.deserialize("json", json):
-            pass
-        vendor = Vendor.objects.get(username=username)
-        if api_key == vendor.api_key:
-            a
-        else:
-            return redirect ('/404')
+        data = request.POST["JSON"]
+        json = serializers.deserialize("json", data)
+        #this part is yet to be developed
+        #vendor = get_object_or_404(Vendor, api_key = json.["api_key"])
+        #transaction = get_object_or_404(Transaction, id = json.["transaction_id"])
+        #update transaction status here
+        return redirect ('/404')
     else:
         return redirect ('/404')
 

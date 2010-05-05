@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Internals</title>
+  </head>
+  
+  <body width="80%">
+    <h1>MyrchMe:Internals</h1>
+    <p>
+    This document is intended to inform the reader of the internal
+    structure of the MyrchMe.
+    <h3>Django Development</h3>
+    <p>
+    To develop MyrchMe, we used the Django web application framework,
+    version 1.1, with Python version 2.6. 
+
+<h5>Setup</h5>
+<p>
+To setup MyrchMe's Django project, first download and install Django 1.1 and then download our source. Make sure that the root project folder is named "myrchme". Open up settings.py (located in the root project folder) and edit the following settings:  
+
+DATABASE_NAME = (YOUR PROJECT ROOT)/mm.db
+
+MEDIA_ROOT = (YOUR PROJECT ROOT)/media
+
+UPLOAD_DIR = (YOUR PROJECT ROOT)/uploads/
+
+TEMPLATE_DIRS = (YOUR PROJECT ROOT)/templates 
+
+Then go into urls.py (the one in your project root, not the one in the main_site directory) and change the following: 
+
+'/Users/Ahmed/myrchme/media/' to '(YOUR PROJECT ROOT)/media/' 
+
+Then to create the database, open up a terminal and cd into your project root.
+
+To create the database, run "python manage.py syncdb". Create an admin user if you'd like to check play with the admin backend (located at /admin) or the admin documentation (/admin/docs/). The functionality of the admin backend can be modified by editing admin.py located in the main_site directory. See Django's docs for more on this (www.docs.djangoproject.com/en/dev/ref/contrib/admin/) 
+
+Now we need to get Google Product's categories into the category table of our database. A script named "import_categories.py" (in the root project dir) will do this for you. Run "python import_categories.py" to import the categories in the main_site/googles_categories.txt file. In the case that Google updates its categories, you can get the new .txt file from their website and run "python import_categories.py <filepath>"  where <filepath> is the location of the new .txt file. 
+
+Now run "python manage.py runserver" and point your browser to http://localhost:8000/ and enjoy! We tested our site in Chrome and Firefox so use those browsers for the best experience. 
+
+Make sure to check our Github profile for updates to the source code. All the source code for the MyrchMe (minus a few settings and static files) can be obtained at http://github.com/myrchme/MyrchMe. 
+</p> 
+
+<h5>Django Basics</h5>
+
+The best way to learn the basics of Django is to visit (docs.djangoproject.com/en/1.1/intro/overview/). Go through the tutorial - it is extremely useful. 
+
+Django uses the Model-Template-View (MTV) paradigm. This is the same as MVC, Django just calls views "templates" and calls the controller "views". Django projects contain one or more apps. Apps are python packages (folders) that live inside you root django project folder. In MyrchMe's case we have only one app called "main_site".  
+
+The most important files in your root folder are urls.py and manage.py. You use manage.py to create/edit your database and run your server, as described above. urls.py defines how your Django server handles requests to all your URLs. Whenever a user visits a url, urls.py regex matches that url with one (and only one) of the patterns you've defined in urls.py. Each URL pattern is paired with a function that Django will execute when someone visits that URL. The function is passed an Http Request object with post and get data and all sorts of http header data. You can also capture parts of a URL and send that to a function (e.g. r'^store/(?P<username>.*)$' captures a username). Note that you can include other python files in urls.py - it is after all just another python file. In our case, we created another urls.py in the main_site directory to separate our main_site app's urls from project URLs. 
+
+So where do these functions that urls.py calls actually live? In views.py: this is where all of the functions that serve web pages exist. Functions in views.py usually take an HTTP request object, perform some logic specific to that page and then return an http response object (usually an HTML file) and optionally, a dictionary of variables to display on that template. 
+
+The templates directory (located in the project root) contains all of the HTML files that make up the front-end of MyrchMe. These are normal HTML files that contain Django-specific tags. These tags are parsed by Django and replaced with dynamic HTML based on the variables passed to the template. The end result in a dynamically generated HTML page.
+
+    </p>
+    <h3>Database</h3>
+    <p>
+    The MyrchMe database is composed of ten tables that correspond to
+    the 10 model classes in models.py.  They are Person, Vendor,
+    Category, Product, PersPref, Transaction, ProductRating,
+    ProductComment, PhysicalAddress and CreditCard.  Each table's
+    function is summarized in admin/doc/models, and described in
+    detail below.
+    </p>
+    <h5>Person</h5>
+    <p>
+    The person model stores data about each of our individual users.
+    Data stored includes user, username, join_date, last_login,
+    is_active, first_name, last_name, gender, email_primary,
+    is_email_subscription, shipping_address, credit_card, gift_freq,
+    max_gift_price, and min_gift_price.  The user field is an
+    extension of the built in Django user model.  The username is a
+    user-genenerated string that denotes the user.  The join date is
+    an automatically generated datetime object created when the given
+    person is created.  last_login is automatically generated datetime
+    object created when the given person is logged in.  Is_active is a
+    boolean to denote whether the given person is active or not.  The
+    next eight fields denote billing and shipping information.  The
+    final three, gift_freq, max_gift_price and min_gift_price are user
+    defined parameters for their automatically generated merchandise.
+    </p>
+
+<h5>Vendor</h5>
+The class Vendor is very similar to the Person class because they both represent a myrchme.com user.  The data about a Vendor object is stored in user, username, company_name, website_url, phone, join_date, last_login, is_active, rep_first_name, rep_last_name, email_primary, buy_url, and api_key.  The Vendor fields that are the same as Person are user, username, join_date, last_login, and is_active and do not need explanations as they are explained above.  Company_name is the name of the company that is using our API.  Website_url is the url to that company's website.  Phone is a phone number to reach the company.  Rep_first_name, rep_last_name, and email_primary are all pieces of contact information for MyrchMe to have on a representative of the Vendor.  Buy_url is the url to the vendor's implementation of the Buy API, and api_key is the unique key given to each Vendor to verify their legitimacy. 
+
+<h5>Category</h5>
+
+The Category class represents the different product categories and stores data in the following fields: title, full_title, description, and parent.  The title field is the farthest right title on the title tree for that category and full_title is the full category title tree.  Parent is the next left title of a given title on a title tree.  Lastly, description is an optional field that can be used to describe the category.  To give an example of a category, we might have "Clothing & Accessories > Clothing > Skirts > Miniskirts."  In this example, Miniskirts is the title, the entire string is the full_title, and Miniskirts' parent is Skirts. 
+
+<h5>Product</h5>
+
+
+The Product class is used to store data about a specific product.  It includes the following required fields: vendor, title, description, prod_id, category, is_active, condition, price, link, image_url and avg_rating, and the following optional fields: brand, isbn, upc, color, size, gender, create_date, last_updated.  The reason some of the fields are optional is because they are only relevant for some Categories (i.e. size only relates to clothing). 
+
+<h5>PersPref</h5>
+
+The PersPref class stores a user's gift preferences.  The fields within PersPref are user, category, tagwords, history, and size.  As always, user relates to the specific user who is logged in.  The category field is a Category object.  Tagwords is a string of comma-separated tags that a user can input that may make his preference more specific.  For example, a user could include his favorite color in the tagwords field and the preference will be saved as that category and more specifically that color.  The history field stores data about the previous items the user has received in that specific category.  And finally, the size field holds data about size, but is only relevant if the category is about clothing. 
+<h5>Transaction</h5>
+The transaction class holds data about a transaction.  Its fields are: buyer, vendor, item, create_date, last_updated, status, and details.  The buyer, vendor, and item fields all hold information relevant to their name.  The create_date field is the date the transaction took place, and the last_updated field holds data about the last time the status was updated.  Status can be either "processing", "shipped", or "delivered" and holds the string that best describes the status of the transaction.  Finally, details holds extra information about the transaction that may need to be included, but is an optional field. 
+
+<h5>ProductRating and ProductClass</h5>
+
+The ProductRating and Product Comment classes are similar because they hold data relating to a specific product that a user can input.  Their similar fields are user, product, and date.  ProductRating has a rating field that is an integer between 1 and 5 that a user can choose to rate the product.  ProductComment has a field called comment that stores a user's comments on a product. 
+
+<h5>PhysicalAddress</h5>
+The Physical Address class is used to make a shipping and billing address.  Its fields are all fields one would find when inputing an address.  The fields are: street_line1, street_line2, city, zip, state, and country. 
+
+<h5>CreditCard</h5>
+
+The CreditCard class stores data about a user's credit card.  Its fields are: name_on_card, type, number, security_code, expiration_date, and billing_address.  Name_on_card is just the name on the credit card, type is the type of card (i.e. visa, mastercard, discover, or american express), number is the credit card number, and security_code is the code on the back of the card.  Billing_address is a PhysicalAddress object with the proper billing address information.
+
+    <h3>Views and Forms</h3>
+    <p>
+    Our views define the logic in the pages presented to the user. All
+    of the views that require a login type, whether Person or Vendor,
+    are labeled accordingly. index takes a request, redirects logged in users to the logged in
+    home page, and handles data from the login form to log in
+    users. register_person creates a form object from
+    RegisterPersonForm, defined in my_forms.py, adds the user to our
+    database and logs them in.  register_vendor does the same for
+    vendors. change_person account takes the new account information
+    from the form submitted by the user and updates their account
+    accordingly.  view_person_profile collects the information
+    relevant to the profile from the database and returns it.
+    view_store and view_my_store_profile collects does the same for
+    the storefront pages and the private store profile pages,
+    respectively.  set_preferences returns the information necessary
+    to display and change the preferences for a given user.
+    logout_view logs out users.  buy_view makes a remote buy request
+    to a vendor based on the product selected and is successful if the
+    transaction is completed. view_inventory allows vendors to view
+    their inventory by collecting the necessary data from our
+    database. upload_products view collects the data necessary for
+    vendors to upload products to our database, and handles the
+    submitted UploadFileForm.
+    </p>
+
+
+
+
+<hr>
+<address></address>
+<!-- hhmts start --> Last modified: Tue May  4 16:25:05 EDT 2010 <!-- hhmts end -->
+</body> </html>

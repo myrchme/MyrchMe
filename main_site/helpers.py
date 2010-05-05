@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import get_object_or_404
 from random import choice
+from myrchme.main_site.exceptions import *
 
 
 def is_person(user):

@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <title>Report</title>
+  </head>
+
+  <body width="80%">
+    <h1>MyrchMe: Final Report</h1>
+    <h3>The Idea</h3>
+    <p>
+      After a week of brainstorming, our team had many different ideas for the topic of our final project.  After a series of debates, we had narrowed our choice down to three.  The first would be a phone/web application that would automatically microblog your location to a network of friends.  We also considered continuing a project that one of our group's members had started, that would allow users to write blog posts on a given topic and compete to receive the most votes from other users and readers.  Lastly, there was a web application that would automatically buy merchandise for its users periodically based on predetermined frequency settings, item category and user-defined tagwords.  This last project would evolve into MyrchMe.  AFter considering the other two objects, we decided that MyrchMe was the best opportunity for us to build something technically challenging and socially useful.
+    </p>  
+    <br />
+    <h3>Development: A Detailed Account</h3>
+    <p>
+    We decided to use the Django web application framework with Python to build MyrchMe because we wanted to take advantage of the admin interface and the framework so that we might focus on MyrchMe itself.  However, this was one of our bigger challenges, since only one of our group members had experience in Django, and the other two had only limited experience with Python in general.  Therefore, the first few days of work on the project was focused on immersion, diving through the Django documentation, and downloading the necessary software for development (python, django, git, sqlite, the Netbeans python plugin).  Our work with object-oriented programming in Java informed our programming in Python well, and definitely flattened the learning curve.
+    Our first programming challenge was to define our projects models.  In its original incarnation, our models included the following classes: Person - for our users, Product - for our merchandise, and Transaction - to hold our transactions.  Since then, we decided to add seven more classes: Vendor - for our business users who would sell the merchandise bought through MyrchMe, PhysicalAddress - for address objects, CreditCard - for credit card objects, PersPref - to represent a user's list of preference bundles, Category - to support for the categorization of products, ProductComment - for comments on products, ProductRating - for product ratings.
+    The vendor class became necessary when we realized that we couldn't use the eBay API to automate product buying.  At first, we wanted to use Amazon Mechanical Turk to solve CAPTCHAs, but even then, we would have been unable to complete the purchase.  Our answer was to have vendor clients partner with our site so that they might implement the necessary software to feature their products on MyrchMe, which required a Vendor class.  The PhysicalAddress, CreditCard and PersPref classes were largely created to simplify our Person class.  Our original person model held nearly all the dara on the site, separating out the classes governing addresses, credit cards and preferences simplified the data models and the form handling.  Furthermore, having addresses and credit cards held in classes allows for users to have multiple addresses and credit cards, and for users to have the same address/credit card, if we changed the relationship to Many-to-Many, something we would do in a future release.  ProductComment and ProductRating were added features to enhance the user profiles and the overall social MyrchMe experience.  Lastly, separating it into classes helped us enforce our invariants - in the original model, you could have a person with an incomplete address or credit card information.  This is not true with the added classes.  The category class was added to clarify product categories.  One of our biggest successes was parsing the google base category taxonomy so that we could include all of its categories (~3000) in our MyrchMe database.
+    While we created and modified our models, we were also busy creating forms to store this data, in my_forms.py.  Some of the difficulties in creating these forms, (e.g. how to edit address files, how users can add and edit preferences) led to some of our changes in the model.
+    Paragraph about views
+    Paragraph about templates
+    The main magic of MyrchMe goes on in two functions, get_random_product and buy.  We decided to build the get_random_product function so that it would build the set of possibly bought merchandise for a given user and return one product from the set.  This function does the grunt work of taking a user's preferred product category and tagwords and finding the next item that should be bought.  Buy, takes this item, finds the vendor that sells it, sends it a Transaction object, and the vendor sends back the Transaction object, changing the status from Processing to Shipped.  This implementation decision allows for many different types of online stores to implement buy.  It also keeps the actual product selection separate from the actual buying, so that no vendor actions can affect item selection for a user.  For the automated buying feature, we run a script, autobuy, in the background, that periodically checks all of our users to see which ones are "due" merchandise, selects an item for them using get_random_product, and executes the purchase using buy.
+    </p>
+    <br />
+    <h3>Reflection</h3>
+    <p>
+    I think our greatest success in working on this project was our time management.  From Day 1, we allocated time not only to write and test our code but also to planning and evaluation.  Some of the problems that came up, for instance, the eBay API's restriction on automated buy order execution, would have been insurmountable if we hadn't started early and planned out our attack thoroughly.  This gave us the time to adapt as we were presented with challenges.  Furthermore, it gave us time to add dimensions to our site that we hadn't planned on.  For instance, the storefront pages, a public display of a vendors for sale items came out of a discussion that we had about the user experience based on an early test.  It is this sort of careful planning and foresight that made MyrchMe 1.0 a project that we are proud of.
+    <br />
+    <h3>Coming Soon: MyrchMe 2.0</h3>
+      <p>
+      As much as MyrchMe 1.0 has to offer, there are a series of features, some large some small, that we would implement for the next incarnation of MyrchMe, MyrchMe 2.0.  These features include, but are not limited to:
+      </p>
+      <ul>
+	<li>Deeper integration with Facebook (friends, pages, Facebook Connect etc.)</li>
+	<li>Synchronization with Google Calendar to match merch deliveries with Google Calendar events</li>
+	<li>Email confirmations showing merch about to be purchased and merch recently purchased</li>
+	<li>More social networking capabilities, including friends, messaging, groups, etc.</li>
+	<li>A smarter merch selection algoritm</li>
+	<li>Support for multiple addresses and credit cards</li>
+      </ul>
+      <p>
+      By deepening our integration with Facebook beyond our Universal Like button, we could take advantage of users existing networks and public preferences to ensure that MyrchMe selects the best merchandise for each user, making the experience more social at the same time.  Synchronization with Google Calendar could ensure that gifts arrive for friends' birthdays, or that users get new merchandise when they need it.  Email confirmation would allow users to catch a bad suggestion before it arrives on their doorstep.  On that note, a smarter merchandise selection algorithm would make sure that merch selection is more often satisfactory.  Finally, support for multiple addresses and credit cards would give users more flexibility.
+      </p>
+  </body>
+</html>
+
+
+    
+      
+      
