@@ -1,5 +1,9 @@
-<<<<<<< HEAD
-Sup guys
-=======
-Sup guys brett was here
->>>>>>> b255f81ce724372ba8259956fc32577c6ecd71a8
+Do you enjoy getting suprise gifts? (who doesn't?) Myrchme is an automated self-gift purchaser. 
+
+Based on a user's entered shopping preferences and satisfaction history with past gifts, our software will automatically purchase a gift at a user-specified frequency (e.g monthly) worth up to a user-specified maximum value (e.g. $10), and ship it to the user as a suprise gift. Vendors can create accounts on our site, upload their products en masse, and integrate with our easy to use API. Integration with out API allows our software to purchase products on behalf of users.
+
+Team:
+Ahmed Belal
+M.W. Floyd
+Brett Silverman
+
